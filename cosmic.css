@@ -25,12 +25,8 @@ body {
     background-attachment: fixed;
 }
 
-/* Globalne Tła (NOWE) - Solidne Kolory */
+/* Globalne Tła (POZOSTAJE TYLKO DOMYŚLNY STYL) */
 .bg-default { background-color: var(--bg-dark); }
-.bg-blue { background-color: #001f3f; } /* Ciemny, elegancki błękit */
-.bg-green { background-color: #003300; } /* Ciemny, cybernetyczny zielony */
-.bg-purple { background-color: #330033; } /* Ciemny purpurowy */
-.bg-red { background-color: #3f0000; } /* Ciemny, głęboki czerwony */
 
 
 .game-wrapper {
@@ -274,18 +270,7 @@ h1 {
 }
 .btn-buy.purchased:hover { opacity: 1; }
 
-/* Nowa klasa podglądu tła (dla solidnych kolorów) */
-.background-preview {
-    width: 60px;
-    height: 40px;
-    border: 2px solid var(--neon-blue);
-    border-radius: 4px;
-    /* Upewnij się, że nie ma resztek image/cover z poprzednich prób */
-    background-image: none !important;
-    background-size: cover !important; 
-    background-position: center center;
-    overflow: hidden;
-}
+/* Usunięto background-preview */
 
 /* Rebirth Zone */
 .rebirth-panel {
