@@ -26,11 +26,32 @@ body {
 }
 
 /* Globalne Tła (NOWE) - aplikowane do body */
+/* Używamy stabilnych linków (Picsum Photos) */
 .bg-default { background-image: none; background-color: var(--bg-dark); }
-.bg-forest { background-image: url('https://i.imgur.com/G5qWw19.jpeg'); background-size: cover; background-position: center center; background-repeat: no-repeat; }
-.bg-lava { background-image: url('https://i.imgur.com/gK9oZ3c.jpeg'); background-size: cover; background-position: center center; background-repeat: no-repeat; }
-.bg-candy { background-image: url('https://i.imgur.com/Q2hXq9o.jpeg'); background-size: cover; background-position: center center; background-repeat: no-repeat; }
-.bg-heaven { background-image: url('https://i.imgur.com/Z9W8GgA.jpeg'); background-size: cover; background-position: center center; background-repeat: no-repeat; }
+.bg-forest { 
+    background-image: url('https://picsum.photos/500/800?random=1'); 
+    background-size: cover; 
+    background-position: center center; 
+    background-repeat: no-repeat; 
+}
+.bg-lava { 
+    background-image: url('https://picsum.photos/500/800?random=2'); 
+    background-size: cover; 
+    background-position: center center; 
+    background-repeat: no-repeat; 
+}
+.bg-candy { 
+    background-image: url('https://picsum.photos/500/800?random=3'); 
+    background-size: cover; 
+    background-position: center center; 
+    background-repeat: no-repeat; 
+}
+.bg-heaven { 
+    background-image: url('https://picsum.photos/500/800?random=4'); 
+    background-size: cover; 
+    background-position: center center; 
+    background-repeat: no-repeat; 
+}
 
 
 .game-wrapper {
@@ -274,6 +295,16 @@ h1 {
 }
 .btn-buy.purchased:hover { opacity: 1; }
 
+/* Nowa klasa podglądu tła */
+.background-preview {
+    width: 60px;
+    height: 40px;
+    border: 2px solid var(--neon-blue);
+    border-radius: 4px;
+    background-size: cover !important; 
+    background-position: center center;
+    overflow: hidden;
+}
 
 /* Rebirth Zone */
 .rebirth-panel {
