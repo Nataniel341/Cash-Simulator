@@ -25,33 +25,12 @@ body {
     background-attachment: fixed;
 }
 
-/* Globalne Tła (NOWE) - aplikowane do body */
-/* Używamy stabilnych linków (Picsum Photos) */
-.bg-default { background-image: none; background-color: var(--bg-dark); }
-.bg-forest { 
-    background-image: url('https://picsum.photos/500/800?random=1'); 
-    background-size: cover; 
-    background-position: center center; 
-    background-repeat: no-repeat; 
-}
-.bg-lava { 
-    background-image: url('https://picsum.photos/500/800?random=2'); 
-    background-size: cover; 
-    background-position: center center; 
-    background-repeat: no-repeat; 
-}
-.bg-candy { 
-    background-image: url('https://picsum.photos/500/800?random=3'); 
-    background-size: cover; 
-    background-position: center center; 
-    background-repeat: no-repeat; 
-}
-.bg-heaven { 
-    background-image: url('https://picsum.photos/500/800?random=4'); 
-    background-size: cover; 
-    background-position: center center; 
-    background-repeat: no-repeat; 
-}
+/* Globalne Tła (NOWE) - Solidne Kolory */
+.bg-default { background-color: var(--bg-dark); }
+.bg-blue { background-color: #001f3f; } /* Ciemny, elegancki błękit */
+.bg-green { background-color: #003300; } /* Ciemny, cybernetyczny zielony */
+.bg-purple { background-color: #330033; } /* Ciemny purpurowy */
+.bg-red { background-color: #3f0000; } /* Ciemny, głęboki czerwony */
 
 
 .game-wrapper {
@@ -295,12 +274,14 @@ h1 {
 }
 .btn-buy.purchased:hover { opacity: 1; }
 
-/* Nowa klasa podglądu tła */
+/* Nowa klasa podglądu tła (dla solidnych kolorów) */
 .background-preview {
     width: 60px;
     height: 40px;
     border: 2px solid var(--neon-blue);
     border-radius: 4px;
+    /* Upewnij się, że nie ma resztek image/cover z poprzednich prób */
+    background-image: none !important;
     background-size: cover !important; 
     background-position: center center;
     overflow: hidden;
