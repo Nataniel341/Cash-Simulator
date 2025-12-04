@@ -18,8 +18,6 @@ const SKINS_BTN_DATA = [
     { id: 'fire', name: 'Hellfire', cost: 100, mult: 0.5, class: 'skin-fire' } 
 ];
 
-// Usunięto stałą BACKGROUNDS_DATA
-
 // Ulepszenia za Rebirth Coins (RC)
 const RC_UPGRADES = [
     { id: 'rc_click', name: '🚀 Super Klik', cost: 5, current: 0, max: 10, icon: '✨', effect: (lvl) => lvl * 0.1, desc: 'Zwiększa bazową moc kliknięcia o 10% za poziom.' },
@@ -40,7 +38,6 @@ let game = {
     pets: { p1:0, p2:0, p3:0 }, 
     ownedSkinsBtn: ['default'],
     equippedSkinBtn: 'default',
-    // Usunięto ownedBackgrounds i equippedBackground
     rcUpgrades: { rc_click: 0, rc_mps: 0, rc_mult_base: 0 } 
 };
 
@@ -65,7 +62,6 @@ function init() {
     
     renderAllShops();
     applySkin(game.equippedSkinBtn, 'btn');
-    // Usunięto applyBackground(game.equippedBackground); 
     updateUI(); 
 }
 
@@ -228,7 +224,6 @@ function buyPet(id) {
     }
 }
 
-// Usunięto buyBackground, equipBackground, applyBackground
 
 function buySkin(id, type) {
     let data = SKINS_BTN_DATA; 
@@ -268,7 +263,15 @@ function applySkin(id, type) {
 
 /* === REBIRTH SYSTEM === */
 function getRebirthCost() {
-    return 100000 + game.rebirthCount * 150000;
+    // Koszt początkowy: 100,000 $
+    // Wzrost o 50% za każdy Rebirth
+    
+    let baseCost = 100000;
+    
+    // Oblicza koszt: 100000 * (1.5 ^ rebirthCount)
+    let cost = baseCost * Math.pow(1.5, game.rebirthCount); 
+    
+    return Math.floor(cost);
 }
 
 function getRebirthGain() {
@@ -334,6 +337,9 @@ function updateUI() {
     document.getElementById('ui-mps').innerText = calculateMPS().toFixed(1);
     document.getElementById('ui-total-mult').innerText = calculateTotalMultiplier().toFixed(2);
     
+    // Licznik Rebirth
+    document.getElementById('ui-rebirth-count').innerText = game.rebirthCount;
+    
     const rcClickUpgrade = RC_UPGRADES.find(u => u.id === 'rc_click');
     let rcClickBonus = rcClickUpgrade ? rcClickUpgrade.effect(rcClickUpgrade.current) : 0;
     document.getElementById('click-base').innerText = (1 + game.clickLevel + rcClickBonus).toFixed(1);
@@ -374,7 +380,6 @@ function updateUI() {
     
     // Sprawdzanie gotowości innych sekcji
     if (checkPetsReady()) alertFlags['nav-pets'] = true;
-    // Usunięto checkBackgroundsReady
     if (checkRCSkinsReady()) alertFlags['nav-skins'] = true;
     if (checkRCUpgradesReady()) alertFlags['nav-coinshop'] = true;
     if (getRebirthGain() > 0) alertFlags['nav-rebirth'] = true;
@@ -404,7 +409,7 @@ function updateUI() {
 function checkPetsReady() {
     return PETS_DATA.some(pet => game.pets[pet.id] === 0 && game.money >= pet.cost);
 }
-// Usunięto checkBackgroundsReady
+
 function checkRCSkinsReady() {
     return SKINS_BTN_DATA.some(skin => !game.ownedSkinsBtn.includes(skin.id) && game.rebirthCoins >= skin.cost);
 }
@@ -482,12 +487,10 @@ function calculateTotalMultiplier() {
         if (skin) mult += skin.mult;
     });
     
-    // Usunięto: 3. Globalne Tła (Kolory)
-
-    // 4. Ulepszenia Globalne
+    // 3. Ulepszenia Globalne
     mult += (game.globalMultLevel * 0.05);
 
-    // 5. Mnożnik RC 
+    // 4. Mnożnik RC 
     const rcMultBaseUpgrade = RC_UPGRADES.find(u => u.id === 'rc_mult_base');
     let rcMultBase = 1 + (rcMultBaseUpgrade ? rcMultBaseUpgrade.effect(rcMultBaseUpgrade.current) : 0);
     mult *= rcMultBase;
@@ -544,8 +547,6 @@ function renderPets() {
         list.appendChild(div);
     });
 }
-
-// Usunięto renderBackgrounds (była w poprzedniej wersji)
 
 function renderSkins() {
     const listBtn = document.getElementById('skins-btn-list');
@@ -623,7 +624,6 @@ function renderRCShop() {
 
 function renderAllShops() {
     renderPets();
-    // Usunięto renderBackgrounds
     renderSkins();
     renderRCShop();
 }
@@ -652,7 +652,7 @@ function createFloatingText(e, text, color) {
     setTimeout(() => el.remove(), 1000);
 }
 
-/* === ZAPIS I ODCZYT (Natychmiastowy po zmianie stanu/zamknięciu) === */
+/* === ZAPIS I ODCZYT === */
 function saveGame() {
     localStorage.setItem('CashSimulatorV4', JSON.stringify(game));
     // console.log("Gra zapisana!");
@@ -666,11 +666,9 @@ function loadGame() {
         
         // Zapewnienie kompatybilności po aktualizacjach struktury gry
         if (game.rebirthCount === undefined) game.rebirthCount = 0;
-        // Usunięto inicjalizację tła: if (game.ownedBackgrounds === undefined) game.ownedBackgrounds = ['bg-default'];
-        // Usunięto inicjalizację tła: if (game.equippedBackground === undefined) game.equippedBackground = 'bg-default';
         if (game.rcUpgrades === undefined) game.rcUpgrades = { rc_click: 0, rc_mps: 0, rc_mult_base: 0 };
         
-        // Specjalne czyszczenie starych zmiennych tła po załadowaniu
+        // Czyszczenie starych zmiennych tła
         if (game.ownedBackgrounds) delete game.ownedBackgrounds;
         if (game.equippedBackground) delete game.equippedBackground;
 
