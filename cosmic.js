@@ -19,12 +19,13 @@ const SKINS_BTN_DATA = [
 ];
 
 // GLOBALNE TŁA (NOWE) - Jednorazowy zakup za $
+// Używamy stabilnych klas CSS (z nowymi linkami w CSS)
 const BACKGROUNDS_DATA = [
-    { id: 'bg-default', name: 'Standard (Ciemny)', cost: 0, mult: 0, class: 'bg-default', preview: 'background-color: #0a0a0a;' },
-    { id: 'bg-forest', name: 'Mroczny Las', cost: 10000, mult: 0.05, class: 'bg-forest', preview: 'background-image: url("https://i.imgur.com/G5qWw19.jpeg");' },
-    { id: 'bg-lava', name: 'Piekielna Magma', cost: 50000, mult: 0.15, class: 'bg-lava', preview: 'background-image: url("https://i.imgur.com/gK9oZ3c.jpeg");' },
-    { id: 'bg-candy', name: 'Kraina Cukierków', cost: 250000, mult: 0.3, class: 'bg-candy', preview: 'background-image: url("https://i.imgur.com/Q2hXq9o.jpeg");' },
-    { id: 'bg-heaven', name: 'Niebiański Spokój', cost: 1000000, mult: 0.5, class: 'bg-heaven', preview: 'background-image: url("https://i.imgur.com/Z9W8GgA.jpeg");' },
+    { id: 'bg-default', name: 'Standard (Ciemny)', cost: 0, mult: 0, class: 'bg-default' },
+    { id: 'bg-forest', name: 'Mroczny Las', cost: 10000, mult: 0.05, class: 'bg-forest' },
+    { id: 'bg-lava', name: 'Piekielna Magma', cost: 50000, mult: 0.15, class: 'bg-lava' },
+    { id: 'bg-candy', name: 'Kraina Cukierków', cost: 250000, mult: 0.3, class: 'bg-candy' },
+    { id: 'bg-heaven', name: 'Niebiański Spokój', cost: 1000000, mult: 0.5, class: 'bg-heaven' },
 ];
 
 // Ulepszenia za Rebirth Coins (RC)
@@ -255,10 +256,6 @@ function buySkin(id, type) {
     let skin = data.find(s => s.id === id);
     let ownedList = game.ownedSkinsBtn;
     
-    // TYMCZASOWO USUWAM SPRAWDZANIE KOSZTU W buySkin, 
-    // bo nie masz tam przycisków do kupowania, tylko do ubierania, ale zostawiam funkcję dla kompletnosci 
-    // w razie, gdybyś ją użył do RC. Domyślnie kupowanie Skinów RC jest w renderSkins.
-    
     if (game.rebirthCoins >= skin.cost && !ownedList.includes(id)) {
         game.rebirthCoins -= skin.cost;
         ownedList.push(id);
@@ -302,6 +299,7 @@ function applyBackground(id) {
     let bg = BACKGROUNDS_DATA.find(b => b.id === id);
     if (!bg) return; 
     
+    // Usuwa stare klasy tła i dodaje nową (zdefiniowaną w CSS)
     body.className = '';
     body.classList.add(bg.class); 
 }
@@ -356,13 +354,13 @@ function switchTab(tabName, btn) {
 }
 
 function getUpgradeCost(id, level) {
-    // KLUCZOWA POPRAWKA: Level Combo/Click zaczyna się od 1. Global/Speed/Bonus od 0.
+    // Poprawne obliczanie kosztów dla wszystkich UPG
     switch(id) {
         case 'click': return Math.floor(50 * Math.pow(1.5, level - 1));
         case 'combo': return Math.floor(300 * Math.pow(1.8, level - 1));
-        case 'global-mult': return Math.floor(1000 * Math.pow(2, level)); // level jest 0 dla pierwszego
-        case 'mps-speed': return Math.floor(5000 * Math.pow(2.5, level)); // level jest 0 dla pierwszego
-        case 'bonus-chance': return Math.floor(15000 * Math.pow(3, level)); // level jest 0 dla pierwszego
+        case 'global-mult': return Math.floor(1000 * Math.pow(2, level));
+        case 'mps-speed': return Math.floor(5000 * Math.pow(2.5, level));
+        case 'bonus-chance': return Math.floor(15000 * Math.pow(3, level));
         default: return 9999999999;
     }
 }
@@ -614,10 +612,11 @@ function renderBackgrounds() {
         let div = document.createElement('div');
         div.className = 'upgrade-card';
         
+        // Używamy klasy CSS dla podglądu
         div.innerHTML = `
             <div class="upgrade-info">
                 <div style="display:flex; align-items:center; gap:15px;">
-                    <div class="${bg.class}" style="width:40px; height:40px; border: 2px solid var(--neon-blue); border-radius:4px; background-size: cover; background-position: center;"></div>
+                    <div class="background-preview ${bg.class}"></div>
                     <div>
                         <h3>${bg.name}</h3>
                         <p style="color:var(--neon-green)">Bonus: +${(bg.mult * 100).toFixed(0)}% do Mnożnika</p>
@@ -737,7 +736,6 @@ function createFloatingText(e, text, color) {
 
 /* === ZAPIS I ODCZYT (Natychmiastowy po zmianie stanu/zamknięciu) === */
 function saveGame() {
-    // W JS duże liczby (powyżej 2^53) mogą tracić precyzję, ale dla gier klikerów ten format powinien wystarczyć.
     localStorage.setItem('CashSimulatorV4', JSON.stringify(game));
     // console.log("Gra zapisana!");
 }
