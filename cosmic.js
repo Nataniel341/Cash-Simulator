@@ -18,14 +18,13 @@ const SKINS_BTN_DATA = [
     { id: 'fire', name: 'Hellfire', cost: 100, mult: 0.5, class: 'skin-fire' } 
 ];
 
-// GLOBALNE TŁA (NOWE) - Jednorazowy zakup za $
-// Używamy stabilnych klas CSS (z nowymi linkami w CSS)
+// GLOBALNE TŁA (NOWE) - ZMIENIONE NA SOLIDNE KOLORY
 const BACKGROUNDS_DATA = [
-    { id: 'bg-default', name: 'Standard (Ciemny)', cost: 0, mult: 0, class: 'bg-default' },
-    { id: 'bg-forest', name: 'Mroczny Las', cost: 10000, mult: 0.05, class: 'bg-forest' },
-    { id: 'bg-lava', name: 'Piekielna Magma', cost: 50000, mult: 0.15, class: 'bg-lava' },
-    { id: 'bg-candy', name: 'Kraina Cukierków', cost: 250000, mult: 0.3, class: 'bg-candy' },
-    { id: 'bg-heaven', name: 'Niebiański Spokój', cost: 1000000, mult: 0.5, class: 'bg-heaven' },
+    { id: 'bg-default', name: 'Standard (Ciemny)', cost: 0, mult: 0.0, class: 'bg-default' },
+    { id: 'bg-blue', name: 'Głęboki Błękit', cost: 10000, mult: 0.05, class: 'bg-blue' },
+    { id: 'bg-green', name: 'Cyber Zieleń', cost: 50000, mult: 0.15, class: 'bg-green' },
+    { id: 'bg-purple', name: 'Kosmiczna Purpura', cost: 250000, mult: 0.3, class: 'bg-purple' },
+    { id: 'bg-red', name: 'Ogień Premium', cost: 1000000, mult: 0.5, class: 'bg-red' },
 ];
 
 // Ulepszenia za Rebirth Coins (RC)
@@ -521,7 +520,7 @@ function calculateTotalMultiplier() {
         if (skin) mult += skin.mult;
     });
     
-    // 3. Globalne Tła
+    // 3. Globalne Tła (Kolory)
     game.ownedBackgrounds.forEach(id => {
         let bg = BACKGROUNDS_DATA.find(b => b.id === id);
         if (bg) mult += bg.mult;
@@ -612,7 +611,7 @@ function renderBackgrounds() {
         let div = document.createElement('div');
         div.className = 'upgrade-card';
         
-        // Używamy klasy CSS dla podglądu
+        // Używamy klasy CSS dla podglądu koloru
         div.innerHTML = `
             <div class="upgrade-info">
                 <div style="display:flex; align-items:center; gap:15px;">
