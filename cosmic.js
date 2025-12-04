@@ -18,14 +18,7 @@ const SKINS_BTN_DATA = [
     { id: 'fire', name: 'Hellfire', cost: 100, mult: 0.5, class: 'skin-fire' } 
 ];
 
-// GLOBALNE TŁA (NOWE) - ZMIENIONE NA SOLIDNE KOLORY
-const BACKGROUNDS_DATA = [
-    { id: 'bg-default', name: 'Standard (Ciemny)', cost: 0, mult: 0.0, class: 'bg-default' },
-    { id: 'bg-blue', name: 'Głęboki Błękit', cost: 10000, mult: 0.05, class: 'bg-blue' },
-    { id: 'bg-green', name: 'Cyber Zieleń', cost: 50000, mult: 0.15, class: 'bg-green' },
-    { id: 'bg-purple', name: 'Kosmiczna Purpura', cost: 250000, mult: 0.3, class: 'bg-purple' },
-    { id: 'bg-red', name: 'Ogień Premium', cost: 1000000, mult: 0.5, class: 'bg-red' },
-];
+// Usunięto stałą BACKGROUNDS_DATA
 
 // Ulepszenia za Rebirth Coins (RC)
 const RC_UPGRADES = [
@@ -47,8 +40,7 @@ let game = {
     pets: { p1:0, p2:0, p3:0 }, 
     ownedSkinsBtn: ['default'],
     equippedSkinBtn: 'default',
-    ownedBackgrounds: ['bg-default'], 
-    equippedBackground: 'bg-default', 
+    // Usunięto ownedBackgrounds i equippedBackground
     rcUpgrades: { rc_click: 0, rc_mps: 0, rc_mult_base: 0 } 
 };
 
@@ -73,7 +65,7 @@ function init() {
     
     renderAllShops();
     applySkin(game.equippedSkinBtn, 'btn');
-    applyBackground(game.equippedBackground); 
+    // Usunięto applyBackground(game.equippedBackground); 
     updateUI(); 
 }
 
@@ -236,19 +228,7 @@ function buyPet(id) {
     }
 }
 
-function buyBackground(id) {
-    let bg = BACKGROUNDS_DATA.find(b => b.id === id);
-    if (game.ownedBackgrounds.includes(id)) return;
-    
-    if (game.money >= bg.cost) {
-        game.money -= bg.cost;
-        game.ownedBackgrounds.push(id);
-        equipBackground(id); 
-        renderAllShops();
-        updateUI();
-        saveGame();
-    }
-}
+// Usunięto buyBackground, equipBackground, applyBackground
 
 function buySkin(id, type) {
     let data = SKINS_BTN_DATA; 
@@ -275,14 +255,6 @@ function equipSkin(id, type) {
     saveGame();
 }
 
-function equipBackground(id) {
-    game.equippedBackground = id;
-    applyBackground(id);
-    renderAllShops();
-    updateUI(); 
-    saveGame();
-}
-
 function applySkin(id, type) {
     if (type === 'btn') {
         let btn = document.getElementById('main-btn');
@@ -293,15 +265,6 @@ function applySkin(id, type) {
     }
 }
 
-function applyBackground(id) {
-    let body = document.body;
-    let bg = BACKGROUNDS_DATA.find(b => b.id === id);
-    if (!bg) return; 
-    
-    // Usuwa stare klasy tła i dodaje nową (zdefiniowaną w CSS)
-    body.className = '';
-    body.classList.add(bg.class); 
-}
 
 /* === REBIRTH SYSTEM === */
 function getRebirthCost() {
@@ -342,7 +305,7 @@ function doRebirth() {
     }
 }
 
-/* === UI & RENDERING FUNCTIONS (Poprawione obliczanie kosztów UPG) === */
+/* === UI & RENDERING FUNCTIONS === */
 
 function switchTab(tabName, btn) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -391,7 +354,7 @@ function updateUI() {
         { id: 'btn-upg-bonus-chance', level: game.bonusChanceLevel, levelId: 'bonus-chance', currency: game.money, nav: 'nav-upgrades' }
     ];
     
-    let alertFlags = { 'nav-upgrades': false, 'nav-pets': false, 'nav-skins': false, 'nav-coinshop': false, 'nav-backgrounds': false };
+    let alertFlags = { 'nav-upgrades': false, 'nav-pets': false, 'nav-skins': false, 'nav-coinshop': false, 'nav-rebirth': false };
 
     upgData.forEach(item => {
         let cost = getUpgradeCost(item.levelId, item.level);
@@ -411,9 +374,10 @@ function updateUI() {
     
     // Sprawdzanie gotowości innych sekcji
     if (checkPetsReady()) alertFlags['nav-pets'] = true;
-    if (checkBackgroundsReady()) alertFlags['nav-backgrounds'] = true;
+    // Usunięto checkBackgroundsReady
     if (checkRCSkinsReady()) alertFlags['nav-skins'] = true;
     if (checkRCUpgradesReady()) alertFlags['nav-coinshop'] = true;
+    if (getRebirthGain() > 0) alertFlags['nav-rebirth'] = true;
     
     // Aplikacja alertów
     Object.keys(alertFlags).forEach(navId => {
@@ -440,9 +404,7 @@ function updateUI() {
 function checkPetsReady() {
     return PETS_DATA.some(pet => game.pets[pet.id] === 0 && game.money >= pet.cost);
 }
-function checkBackgroundsReady() {
-    return BACKGROUNDS_DATA.some(bg => !game.ownedBackgrounds.includes(bg.id) && game.money >= bg.cost);
-}
+// Usunięto checkBackgroundsReady
 function checkRCSkinsReady() {
     return SKINS_BTN_DATA.some(skin => !game.ownedSkinsBtn.includes(skin.id) && game.rebirthCoins >= skin.cost);
 }
@@ -520,11 +482,7 @@ function calculateTotalMultiplier() {
         if (skin) mult += skin.mult;
     });
     
-    // 3. Globalne Tła (Kolory)
-    game.ownedBackgrounds.forEach(id => {
-        let bg = BACKGROUNDS_DATA.find(b => b.id === id);
-        if (bg) mult += bg.mult;
-    });
+    // Usunięto: 3. Globalne Tła (Kolory)
 
     // 4. Ulepszenia Globalne
     mult += (game.globalMultLevel * 0.05);
@@ -587,46 +545,7 @@ function renderPets() {
     });
 }
 
-function renderBackgrounds() {
-    const list = document.getElementById('backgrounds-list');
-    list.innerHTML = '';
-
-    BACKGROUNDS_DATA.forEach(bg => {
-        let owned = game.ownedBackgrounds.includes(bg.id);
-        let equipped = game.equippedBackground === bg.id;
-        let cost = bg.cost;
-        
-        let btnHTML = '';
-        if (equipped) {
-            btnHTML = `<button class="btn-buy" disabled style="background:#004d00; color:#fff;">UBRANE</button>`;
-        } else if (owned) {
-            btnHTML = `<button class="btn-buy can-afford" onclick="equipBackground('${bg.id}')">Ubierz</button>`; 
-        } else {
-            let canAfford = game.money >= cost;
-            btnHTML = `<button class="btn-buy ${canAfford ? 'can-afford' : ''}" onclick="buyBackground('${bg.id}')">
-                $${formatNumber(cost)}
-            </button>`;
-        }
-
-        let div = document.createElement('div');
-        div.className = 'upgrade-card';
-        
-        // Używamy klasy CSS dla podglądu koloru
-        div.innerHTML = `
-            <div class="upgrade-info">
-                <div style="display:flex; align-items:center; gap:15px;">
-                    <div class="background-preview ${bg.class}"></div>
-                    <div>
-                        <h3>${bg.name}</h3>
-                        <p style="color:var(--neon-green)">Bonus: +${(bg.mult * 100).toFixed(0)}% do Mnożnika</p>
-                    </div>
-                </div>
-            </div>
-            ${btnHTML}
-        `;
-        list.appendChild(div);
-    });
-}
+// Usunięto renderBackgrounds (była w poprzedniej wersji)
 
 function renderSkins() {
     const listBtn = document.getElementById('skins-btn-list');
@@ -704,7 +623,7 @@ function renderRCShop() {
 
 function renderAllShops() {
     renderPets();
-    renderBackgrounds();
+    // Usunięto renderBackgrounds
     renderSkins();
     renderRCShop();
 }
@@ -747,9 +666,14 @@ function loadGame() {
         
         // Zapewnienie kompatybilności po aktualizacjach struktury gry
         if (game.rebirthCount === undefined) game.rebirthCount = 0;
-        if (game.ownedBackgrounds === undefined) game.ownedBackgrounds = ['bg-default'];
-        if (game.equippedBackground === undefined) game.equippedBackground = 'bg-default';
+        // Usunięto inicjalizację tła: if (game.ownedBackgrounds === undefined) game.ownedBackgrounds = ['bg-default'];
+        // Usunięto inicjalizację tła: if (game.equippedBackground === undefined) game.equippedBackground = 'bg-default';
         if (game.rcUpgrades === undefined) game.rcUpgrades = { rc_click: 0, rc_mps: 0, rc_mult_base: 0 };
+        
+        // Specjalne czyszczenie starych zmiennych tła po załadowaniu
+        if (game.ownedBackgrounds) delete game.ownedBackgrounds;
+        if (game.equippedBackground) delete game.equippedBackground;
+
 
         const newPets = {};
         PETS_DATA.forEach(pet => {
