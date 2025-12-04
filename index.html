@@ -4,13 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cash Simulator: Ultimate Edition</title>
-    <link rel="stylesheet" href="cosmic.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="game-wrapper bg-default" id="game-wrapper">
     <header>
         <h1>💵 CASH SIMULATOR</h1>
+        
+        <div style="font-size: 0.9rem; color: var(--neon-red); margin-top: 5px; font-weight: bold;">
+            ODRODZENIA: <span id="ui-rebirth-count">0</span>x
+        </div>
+        
         <div class="currencies">
             <div class="curr-box money-text">💵 <span id="ui-money">0</span></div>
             <div class="curr-box rc-text">🪙 <span id="ui-rc">0</span></div>
@@ -128,7 +133,7 @@
             </p>
             <button id="rebirth-btn" onclick="doRebirth()">ODRODZENIE</button>
         </div>
-        <p style="text-align:center; margin-top:20px; color:#555;">Wymagane: 100K$ (Wykonano: 0x)</p>
+        <p style="text-align:center; margin-top:20px; color:#555;">Wymagane: 100K$ (Wykonano: <span id="ui-rebirth-count-footer">0</span>x)</p>
     </div>
 
 </div>
@@ -142,6 +147,6 @@
     <button class="nav-btn" id="nav-rebirth" onclick="switchTab('rebirth', this)" style="color: var(--neon-red);">☢️</button>
 </nav>
 
-<script src="cosmic.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
