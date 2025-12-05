@@ -3,89 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cash Sim: GOD MODE ⚡</title>
-    <link rel="stylesheet" href="cosmic.css">
+    <title>Cash Sim: Santa Ultimate ❄️</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
 
     <div id="particles-container"></div>
 
-    <div id="achievement-popup" class="achievement-popup hidden">
-        <div class="icon">🏆</div>
-        <div class="text">
-            <h4>Osiągnięcie Odblokowane!</h4>
-            <p id="ach-name">Nazwa</p>
-        </div>
-    </div>
-
-    <div id="offline-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2>🌙 Witaj ponownie!</h2>
-            <p>Twoje pety pracowały ciężko, gdy spałeś.</p>
-            <h1 class="neon-text" id="offline-gain">0 $</h1>
-            <button onclick="closeModal('offline-modal')" class="btn-claim">ODBIERZ</button>
-        </div>
-    </div>
-
-    <div class="game-wrapper">
+    <div class="game-wrapper bg-default" id="game-wrapper">
         <header>
-            <h1 class="glitch" data-text="CASH GOD">CASH GOD</h1>
+            <h1>💵 CASH SIMULATOR</h1>
             
-            <div class="top-stats">
-                <div class="stat-pill red">
-                    <i class="fa-solid fa-arrows-rotate"></i> <span id="ui-rebirth">0</span>
-                </div>
-                <div class="stat-pill gold">
-                    <i class="fa-solid fa-bolt"></i> x<span id="ui-mult">1.00</span>
-                </div>
+            <div style="font-size: 0.9rem; color: var(--neon-red); margin-top: 5px; font-weight: bold;">
+                ODRODZENIA: <span id="ui-rebirth-count">0</span>x
             </div>
-
+            
             <div class="currencies">
-                <div class="curr-box money">
-                    <i class="fa-solid fa-money-bill-wave"></i> <span id="ui-money">0</span>
-                </div>
-                <div class="curr-box rc">
-                    <i class="fa-solid fa-coins"></i> <span id="ui-rc">0</span>
-                </div>
-                <div class="curr-box gems">
-                    <i class="fa-regular fa-gem"></i> <span id="ui-gems">0</span>
-                </div>
+                <div class="curr-box money-text">💵 <span id="ui-money">0</span></div>
+                <div class="curr-box rc-text">🪙 <span id="ui-rc">0</span></div>
             </div>
-            
-            <div class="mps-bar">
-                <span>MPS: <span id="ui-mps">0</span>/s</span>
+            <div style="margin-top: 5px; font-size: 0.8rem; color: #888;">
+                MPS: <span id="ui-mps">0</span>/s <span style="color:var(--neon-green); font-size:0.7rem;" id="ui-mps-boost">(+0%)</span>
+            </div>
+            <div style="font-size: 0.8rem; color: var(--neon-gold);">
+                Mnożnik: x<span id="ui-total-mult">1.00</span>
             </div>
         </header>
 
-        <div class="combo-wrapper">
-            <div class="combo-fill" id="combo-fill"></div>
-            <span id="combo-text">COMBO x1.0</span>
+        <div class="combo-container" id="combo-box">
+            <div id="combo-text">COMBO x1.0</div>
+            <div id="combo-fill"></div>
         </div>
 
         <div id="tab-game" class="tab-content active">
-            <div class="main-stage">
-                <button id="main-btn" onmousedown="handlePress(event)" onmouseup="handleRelease(event)" onmouseleave="handleRelease(event)">
-                    <div class="inner-circle">$</div>
-                </button>
+            <div class="click-section">
+                <button id="main-btn" onclick="handleClick(event)">$</button>
                 
-                <div class="click-info">
-                    Moc: <span id="click-power" class="neon-green">1</span> $
+                <div id="info-box-click" class="info-box-click">
+                    <p>Moc Klika: <span id="click-base">1.0</span>$</p>
                 </div>
-
-                <div id="active-pets-row">
-                    </div>
+                
+                <div id="active-pets-display" class="active-pets-display"></div>
             </div>
         </div>
 
+        <div id="tab-event" class="tab-content">
+            <h2 style="color: #fff; text-shadow: 0 0 10px cyan;">❄️ ŚWIĄTECZNY EVENT ❄️</h2>
+            <div class="event-timer">KONIEC ZA: <span id="event-countdown">47:59:59</span></div>
+            <p style="text-align:center; color:cyan; font-size:0.8rem; margin-bottom:15px;">Przedmioty z eventu zostają na ZAWSZE!</p>
+
+            <div id="event-list">
+                </div>
+        </div>
+
         <div id="tab-upgrades" class="tab-content">
-            <h2>🛠️ Warsztat</h2>
-            <div id="upgrades-list" class="scroll-list"></div>
+            <h2>🛠️ Ulepszenia</h2>
+            <div id="upgrades-list">
+                </div>
         </div>
 
         <div id="tab-pets" class="tab-content">
-            <h2>🤖 Cyber Zoo</h2>
-            <div id="pets-list" class="scroll-list"></div>
+            <h2>🤖 Cyber-Zoo</h2>
+            <div id="pets-list"></div>
         </div>
 
         <div id="tab-casino" class="tab-content">
@@ -96,54 +76,52 @@
                     <div class="slot-window"><span id="slot2">🍒</span></div>
                     <div class="slot-window"><span id="slot3">🍒</span></div>
                 </div>
-                <p class="casino-info">Koszt: 5% Twojej kasy. Szansa na x10, RC lub GEMY!</p>
-                <button class="btn-spin" onclick="spinCasino()">ZAKRĘĆ!</button>
-                <p id="casino-result">Powodzenia...</p>
+                <p>Koszt: 5% Kasy. Wygraj x10 lub Gemy!</p>
+                <button class="btn-buy can-afford" onclick="spinCasino()">ZAKRĘĆ!</button>
+                <p id="casino-result">Spróbuj szczęścia...</p>
             </div>
         </div>
 
-        <div id="tab-achievements" class="tab-content">
-            <h2>🏆 Osiągnięcia</h2>
-            <div id="achievements-list" class="scroll-list"></div>
+        <div id="tab-skins" class="tab-content">
+            <h2>🎨 Skiny</h2>
+            <div id="skins-btn-list"></div>
         </div>
-
-        <div id="tab-premium" class="tab-content">
-            <h2>💎 Czarny Rynek</h2>
-            <div id="premium-list" class="scroll-list"></div>
+        
+        <div id="tab-coinshop" class="tab-content">
+            <h2>💰 Sklep Rebirth</h2>
+            <div id="rc-shop-list"></div>
         </div>
 
         <div id="tab-rebirth" class="tab-content">
-            <div class="rebirth-container">
-                <h2>☢️ STREFA ZERO ☢️</h2>
-                <p>Zresetuj postęp, zyskaj potęgę.</p>
-                <div class="rebirth-stats">
-                    <div>Obecny Bonus: <span id="rebirth-current-bonus" class="neon-red">0%</span></div>
-                    <div>Po resecie: <span id="rebirth-next-bonus" class="neon-green">0%</span></div>
-                </div>
+            <div class="rebirth-panel">
+                <h2>☢️ STREFA ODRODZEŃ ☢️</h2>
+                <p>Resetuje kasę i zwykłe ulepszenia.</p>
+                <p>Zachowujesz: Skiny, Event Item, Pety.</p>
+                <p style="margin: 20px 0; font-size: 1.1rem; color: #fff;">
+                    Zyskasz: <b style="color: var(--neon-gold);">+<span id="rebirth-gain">0</span> RC</b>
+                </p>
                 
-                <div class="rebirth-actions">
-                    <button class="btn-rebirth" onclick="doRebirth(1)">
-                        Kup 1 <br> <small>(<span id="rebirth-cost-1">0</span> $)</small>
-                    </button>
-                    <button class="btn-rebirth bulk" onclick="doRebirth(-1)">
-                        KUP MAX <br> <small>(<span id="rebirth-max-count">0</span>x)</small>
-                    </button>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="rebirth-btn" onclick="doRebirth(1)">ODRODZENIE</button>
+                    <button id="rebirth-btn-max" onclick="doRebirth(-1)" style="background: gold; color: black;">KUP MAX</button>
                 </div>
             </div>
+            <p style="text-align:center; margin-top:20px; color:#555;">Następny koszt: <span id="rebirth-req-display">100K</span>$</p>
         </div>
 
     </div>
 
-    <nav class="bottom-nav">
-        <button class="nav-btn active" onclick="switchTab('game', this)"><i class="fa-solid fa-gamepad"></i></button>
-        <button class="nav-btn" onclick="switchTab('upgrades', this)"><i class="fa-solid fa-hammer"></i></button>
-        <button class="nav-btn" onclick="switchTab('pets', this)"><i class="fa-solid fa-robot"></i></button>
-        <button class="nav-btn" onclick="switchTab('casino', this)"><i class="fa-solid fa-dice"></i></button>
-        <button class="nav-btn" onclick="switchTab('achievements', this)"><i class="fa-solid fa-trophy"></i></button>
-        <button class="nav-btn" onclick="switchTab('premium', this)"><i class="fa-regular fa-gem"></i></button>
-        <button class="nav-btn danger" onclick="switchTab('rebirth', this)"><i class="fa-solid fa-radiation"></i></button>
+    <nav class="nav-bar">
+        <button class="nav-btn active" id="nav-game" onclick="switchTab('game', this)"><i class="fa-solid fa-gamepad"></i></button>
+        <button class="nav-btn" id="nav-event" onclick="switchTab('event', this)" style="color: cyan;"><i class="fa-regular fa-snowflake"></i></button>
+        <button class="nav-btn" id="nav-upgrades" onclick="switchTab('upgrades', this)"><i class="fa-solid fa-hammer"></i></button>
+        <button class="nav-btn" id="nav-pets" onclick="switchTab('pets', this)"><i class="fa-solid fa-robot"></i></button>
+        <button class="nav-btn" id="nav-casino" onclick="switchTab('casino', this)"><i class="fa-solid fa-dice"></i></button>
+        <button class="nav-btn" id="nav-skins" onclick="switchTab('skins', this)"><i class="fa-solid fa-shirt"></i></button>
+        <button class="nav-btn" id="nav-coinshop" onclick="switchTab('coinshop', this)"><i class="fa-solid fa-coins"></i></button>
+        <button class="nav-btn" id="nav-rebirth" onclick="switchTab('rebirth', this)" style="color: var(--neon-red);"><i class="fa-solid fa-radiation"></i></button>
     </nav>
 
-    <script src="cosmic.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
