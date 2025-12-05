@@ -5,10 +5,11 @@
     --neon-pink: #ff00ff;
     --neon-gold: #ffd700;
     --neon-red: #ff3333;
+    --neon-ice: #aaffff;
     --bg-dark: #0a0a0a;
     --panel-bg: #141414;
-    --alert-neon: #00bbff; /* Kolor alertu nawigacji */
-    --can-afford-neon: #00d9ff; /* Kolor podświetlenia "stać mnie" */
+    --alert-neon: #00bbff; 
+    --can-afford-neon: #00d9ff;
 }
 
 body {
@@ -25,9 +26,8 @@ body {
     background-attachment: fixed;
 }
 
-/* Globalne Tła (POZOSTAJE TYLKO DOMYŚLNY STYL) */
+/* TŁO DOMYŚLNE */
 .bg-default { background-color: var(--bg-dark); }
-
 
 .game-wrapper {
     width: 100%;
@@ -39,7 +39,7 @@ body {
     position: relative;
     padding-bottom: 80px;
     transition: background 0.5s;
-    background: rgba(20, 20, 20, 0.95); /* Lekka przezroczystość */
+    background: rgba(20, 20, 20, 0.98);
 }
 
 /* === HEADER & STATS === */
@@ -190,6 +190,20 @@ h1 {
 .skin-matrix { background: #000 !important; border-color: #0f0 !important; box-shadow: 0 0 20px #0f0 !important; color: #0f0 !important; }
 .skin-fire { background: radial-gradient(circle, #ffcc00, #ff0000) !important; box-shadow: 0 0 40px #ff0000 !important; border-color: #ffaa00 !important; animation: pulseRed 1s infinite; color: #ffcc00 !important; }
 
+/* EVENT SKIN - WINTER */
+.skin-winter { 
+    background: radial-gradient(circle, #ffffff, #cc0000) !important; 
+    box-shadow: 0 0 40px #cc0000 !important; 
+    border-color: #ffffff !important; 
+    color: #cc0000 !important;
+    animation: pulseWinter 2s infinite;
+}
+@keyframes pulseWinter {
+    0% { box-shadow: 0 0 20px #ffffff; }
+    50% { box-shadow: 0 0 40px #cc0000; }
+    100% { box-shadow: 0 0 20px #ffffff; }
+}
+
 /* === TABS CONTENT & UPGRADES === */
 .tab-content {
     display: none;
@@ -204,6 +218,20 @@ h1 {
     padding-bottom: 5px; 
     margin-top: 0; 
     margin-bottom: 20px;
+}
+
+/* Event Timer */
+.event-timer {
+    text-align: center;
+    font-size: 1.5rem;
+    color: cyan;
+    font-family: monospace;
+    margin-bottom: 20px;
+    background: rgba(0, 255, 255, 0.1);
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid cyan;
+    text-shadow: 0 0 10px cyan;
 }
 
 .upgrade-card {
@@ -270,8 +298,6 @@ h1 {
 }
 .btn-buy.purchased:hover { opacity: 1; }
 
-/* Usunięto background-preview */
-
 /* Rebirth Zone */
 .rebirth-panel {
     text-align: center;
@@ -307,6 +333,7 @@ h1 {
     border-top: 2px solid #333;
     height: 60px;
     z-index: 10;
+    overflow-x: auto; /* Obsługa mniejszych ekranów z wieloma przyciskami */
 }
 
 .nav-btn {
@@ -317,9 +344,11 @@ h1 {
     font-weight: bold;
     cursor: pointer;
     transition: 0.3s;
-    font-size: 0.9rem;
+    font-size: 0.8rem; /* Nieco mniejszy font, by zmieścić event */
     border-top: 3px solid transparent;
     position: relative;
+    white-space: nowrap;
+    padding: 0 5px;
 }
 
 .nav-btn.active {
@@ -367,9 +396,3 @@ h1 {
 }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-@keyframes pulseRed {
-    0% { box-shadow: 0 0 20px #ff0000; }
-    50% { box-shadow: 0 0 40px #ff0000; }
-    100% { box-shadow: 0 0 20px #ff0000; }
-}
