@@ -2,126 +2,157 @@
 <html lang="pl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cash Sim: Santa Ultimate ❄️</title>
-    <link rel="stylesheet" href="cosmic.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cash Simulator: Santa Update ❄️</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div id="particles-container"></div>
-
-    <div class="game-wrapper bg-default" id="game-wrapper">
-        <header>
-            <h1>💵 CASH SIMULATOR</h1>
-            
-            <div style="font-size: 0.9rem; color: var(--neon-red); margin-top: 5px; font-weight: bold;">
-                ODRODZENIA: <span id="ui-rebirth-count">0</span>x
-            </div>
-            
-            <div class="currencies">
-                <div class="curr-box money-text">💵 <span id="ui-money">0</span></div>
-                <div class="curr-box rc-text">🪙 <span id="ui-rc">0</span></div>
-            </div>
-            <div style="margin-top: 5px; font-size: 0.8rem; color: #888;">
-                MPS: <span id="ui-mps">0</span>/s <span style="color:var(--neon-green); font-size:0.7rem;" id="ui-mps-boost">(+0%)</span>
-            </div>
-            <div style="font-size: 0.8rem; color: var(--neon-gold);">
-                Mnożnik: x<span id="ui-total-mult">1.00</span>
-            </div>
-        </header>
-
-        <div class="combo-container" id="combo-box">
-            <div id="combo-text">COMBO x1.0</div>
-            <div id="combo-fill"></div>
-        </div>
-
-        <div id="tab-game" class="tab-content active">
-            <div class="click-section">
-                <button id="main-btn" onclick="handleClick(event)">$</button>
-                
-                <div id="info-box-click" class="info-box-click">
-                    <p>Moc Klika: <span id="click-base">1.0</span>$</p>
-                </div>
-                
-                <div id="active-pets-display" class="active-pets-display"></div>
-            </div>
-        </div>
-
-        <div id="tab-event" class="tab-content">
-            <h2 style="color: #fff; text-shadow: 0 0 10px cyan;">❄️ ŚWIĄTECZNY EVENT ❄️</h2>
-            <div class="event-timer">KONIEC ZA: <span id="event-countdown">47:59:59</span></div>
-            <p style="text-align:center; color:cyan; font-size:0.8rem; margin-bottom:15px;">Przedmioty z eventu zostają na ZAWSZE!</p>
-
-            <div id="event-list">
-                </div>
-        </div>
-
-        <div id="tab-upgrades" class="tab-content">
-            <h2>🛠️ Ulepszenia</h2>
-            <div id="upgrades-list">
-                </div>
-        </div>
-
-        <div id="tab-pets" class="tab-content">
-            <h2>🤖 Cyber-Zoo</h2>
-            <div id="pets-list"></div>
-        </div>
-
-        <div id="tab-casino" class="tab-content">
-            <h2>🎰 Cyber Kasyno</h2>
-            <div class="casino-panel">
-                <div class="slot-machine">
-                    <div class="slot-window"><span id="slot1">🍒</span></div>
-                    <div class="slot-window"><span id="slot2">🍒</span></div>
-                    <div class="slot-window"><span id="slot3">🍒</span></div>
-                </div>
-                <p>Koszt: 5% Kasy. Wygraj x10 lub Gemy!</p>
-                <button class="btn-buy can-afford" onclick="spinCasino()">ZAKRĘĆ!</button>
-                <p id="casino-result">Spróbuj szczęścia...</p>
-            </div>
-        </div>
-
-        <div id="tab-skins" class="tab-content">
-            <h2>🎨 Skiny</h2>
-            <div id="skins-btn-list"></div>
+<div class="game-wrapper bg-default" id="game-wrapper">
+    <header>
+        <h1>💵 CASH SIMULATOR</h1>
+        
+        <div style="font-size: 0.9rem; color: var(--neon-red); margin-top: 5px; font-weight: bold;">
+            ODRODZENIA: <span id="ui-rebirth-count">0</span>x
         </div>
         
-        <div id="tab-coinshop" class="tab-content">
-            <h2>💰 Sklep Rebirth</h2>
-            <div id="rc-shop-list"></div>
+        <div class="currencies">
+            <div class="curr-box money-text">💵 <span id="ui-money">0</span></div>
+            <div class="curr-box rc-text">🪙 <span id="ui-rc">0</span></div>
         </div>
-
-        <div id="tab-rebirth" class="tab-content">
-            <div class="rebirth-panel">
-                <h2>☢️ STREFA ODRODZEŃ ☢️</h2>
-                <p>Resetuje kasę i zwykłe ulepszenia.</p>
-                <p>Zachowujesz: Skiny, Event Item, Pety.</p>
-                <p style="margin: 20px 0; font-size: 1.1rem; color: #fff;">
-                    Zyskasz: <b style="color: var(--neon-gold);">+<span id="rebirth-gain">0</span> RC</b>
-                </p>
-                
-                <div style="display: flex; gap: 10px; justify-content: center;">
-                    <button id="rebirth-btn" onclick="doRebirth(1)">ODRODZENIE</button>
-                    <button id="rebirth-btn-max" onclick="doRebirth(-1)" style="background: gold; color: black;">KUP MAX</button>
-                </div>
-            </div>
-            <p style="text-align:center; margin-top:20px; color:#555;">Następny koszt: <span id="rebirth-req-display">100K</span>$</p>
+        <div style="margin-top: 5px; font-size: 0.8rem; color: #888;">
+            MPS (Na sek): <span id="ui-mps">0</span> <span style="color:var(--neon-green); font-size:0.7rem;" id="ui-mps-boost">(+0%)</span>
         </div>
+        <div style="font-size: 0.8rem; color: var(--neon-gold);">
+            Łączny Mnożnik: x<span id="ui-total-mult">1.00</span>
+        </div>
+    </header>
 
+    <div class="combo-container" id="combo-box">
+        <div id="combo-text">🔥 COMBO X2 AKTYWNE 🔥</div>
+        <div id="combo-fill"></div>
     </div>
 
-    <nav class="nav-bar">
-        <button class="nav-btn active" id="nav-game" onclick="switchTab('game', this)"><i class="fa-solid fa-gamepad"></i></button>
-        <button class="nav-btn" id="nav-event" onclick="switchTab('event', this)" style="color: cyan;"><i class="fa-regular fa-snowflake"></i></button>
-        <button class="nav-btn" id="nav-upgrades" onclick="switchTab('upgrades', this)"><i class="fa-solid fa-hammer"></i></button>
-        <button class="nav-btn" id="nav-pets" onclick="switchTab('pets', this)"><i class="fa-solid fa-robot"></i></button>
-        <button class="nav-btn" id="nav-casino" onclick="switchTab('casino', this)"><i class="fa-solid fa-dice"></i></button>
-        <button class="nav-btn" id="nav-skins" onclick="switchTab('skins', this)"><i class="fa-solid fa-shirt"></i></button>
-        <button class="nav-btn" id="nav-coinshop" onclick="switchTab('coinshop', this)"><i class="fa-solid fa-coins"></i></button>
-        <button class="nav-btn" id="nav-rebirth" onclick="switchTab('rebirth', this)" style="color: var(--neon-red);"><i class="fa-solid fa-radiation"></i></button>
-    </nav>
+    <div id="tab-game" class="tab-content active">
+        <div class="click-section">
+            <button id="main-btn" onclick="handleClick(event)">$</button>
+            
+            <div id="info-box-click" class="info-box-click">
+                <p>💵 Klik: <span id="click-base">1.0</span>$ (Ładuj COMBO!)</p>
+            </div>
+            
+            <div id="active-pets-display" class="active-pets-display">
+                </div>
+        </div>
+    </div>
 
-    <script src="cosmic.js"></script>
+    <div id="tab-event" class="tab-content">
+        <h2 style="color: #fff; text-shadow: 0 0 10px cyan;">❄️ Mikołajkowy Event ❄️</h2>
+        <div class="event-timer">KONIEC ZA: <span id="event-countdown">47:59:59</span></div>
+        <p style="text-align:center; color:cyan; font-size:0.8rem; margin-bottom:15px;">Przedmioty kupione tutaj zostają na ZAWSZE!</p>
+
+        <div id="event-list">
+            </div>
+    </div>
+
+    <div id="tab-upgrades" class="tab-content">
+        <h2>🛠️ Ulepszenia</h2>
+        
+        <div class="upgrade-card">
+            <div class="upgrade-info">
+                <h3>⚡ Moc Kliknięcia (P: <span id="lvl-click">1</span>)</h3>
+                <p>Zwiększa bazową kasę za klik (+1$).</p>
+            </div>
+            <button class="btn-buy" id="btn-upg-click" onclick="buyClickUpgrade()">
+                $<span id="cost-click">50</span>
+            </button>
+        </div>
+
+        <div class="upgrade-card">
+            <div class="upgrade-info">
+                <h3>⏳ Pojemność Combo (P: <span id="lvl-combo">1</span>)</h3>
+                <p>Combo trwa dłużej i wolniej stygnie.</p>
+            </div>
+            <button class="btn-buy" id="btn-upg-combo" onclick="buyComboUpgrade()">
+                $<span id="cost-combo">300</span>
+            </button>
+        </div>
+        
+        <div class="upgrade-card">
+            <div class="upgrade-info">
+                <h3>💸 Globalny Mnożnik (P: <span id="lvl-global-mult">0</span>)</h3>
+                <p>Dodaje 5% do całkowitego dochodu.</p>
+            </div>
+            <button class="btn-buy" id="btn-upg-global-mult" onclick="buyGlobalMultiplier()">
+                $<span id="cost-global-mult">1K</span>
+            </button>
+        </div>
+        
+        <div class="upgrade-card">
+            <div class="upgrade-info">
+                <h3>⚙️ Szybkość Pasywna (P: <span id="lvl-mps-speed">0</span>)</h3>
+                <p>Zwiększa MPS o 10% (Kumuluje się!).</p>
+            </div>
+            <button class="btn-buy" id="btn-upg-mps-speed" onclick="buyMpsSpeed()">
+                $<span id="cost-mps-speed">5K</span>
+            </button>
+        </div>
+
+        <div class="upgrade-card">
+            <div class="upgrade-info">
+                <h3>💎 Szansa na Bonus (P: <span id="lvl-bonus-chance">0</span>)</h3>
+                <p>1% szansy na 10x dochodu z kliknięcia.</p>
+            </div>
+            <button class="btn-buy" id="btn-upg-bonus-chance" onclick="buyBonusChance()">
+                $<span id="cost-bonus-chance">15K</span>
+            </button>
+        </div>
+    </div>
+
+    <div id="tab-pets" class="tab-content">
+        <h2>🤖 Cyber-Zoo</h2>
+        <div id="pets-list">
+            </div>
+    </div>
+
+    <div id="tab-skins" class="tab-content">
+        <h2>🎨 Centrum Skinów</h2>
+        <div id="skins-btn-list" style="margin-bottom: 20px;">
+            </div>
+    </div>
+    
+    <div id="tab-coinshop" class="tab-content">
+        <h2>💰 Sklep RC (Rebirth Coins)</h2>
+        <p style="color:var(--neon-gold); margin-bottom: 15px;">**Permanentne** ulepszenia.</p>
+        <div id="rc-shop-list">
+            </div>
+    </div>
+
+    <div id="tab-rebirth" class="tab-content">
+        <div class="rebirth-panel">
+            <h2>☢️ SYSTEM ODRODZEŃ ☢️</h2>
+            <p>Zresetuj Kasę i zwykłe Ulepszenia.</p>
+            <p>Zachowaj: Skiny, Event Item, RC Upgrade.</p>
+            <p style="margin: 20px 0; font-size: 1.1rem; color: #fff;">
+                Nagroda: <b style="color: var(--neon-gold); font-size: 1.5rem;">+<span id="rebirth-gain">0</span> RC</b>
+            </p>
+            <button id="rebirth-btn" onclick="doRebirth()">ODRODZENIE</button>
+        </div>
+        <p style="text-align:center; margin-top:20px; color:#555;">Wymagane: <span id="rebirth-req-display">100K</span>$</p>
+    </div>
+
+</div>
+
+<nav class="nav-bar">
+    <button class="nav-btn active" id="nav-game" onclick="switchTab('game', this)">GRA</button>
+    <button class="nav-btn" id="nav-event" onclick="switchTab('event', this)" style="color: cyan;">EVENT ❄️</button>
+    <button class="nav-btn" id="nav-upgrades" onclick="switchTab('upgrades', this)">UPG</button>
+    <button class="nav-btn" id="nav-pets" onclick="switchTab('pets', this)">PETS</button>
+    <button class="nav-btn" id="nav-skins" onclick="switchTab('skins', this)">SKINY</button>
+    <button class="nav-btn" id="nav-coinshop" onclick="switchTab('coinshop', this)">RC</button>
+    <button class="nav-btn" id="nav-rebirth" onclick="switchTab('rebirth', this)" style="color: var(--neon-red);">☢️</button>
+</nav>
+
+<script src="script.js"></script>
 </body>
 </html>
