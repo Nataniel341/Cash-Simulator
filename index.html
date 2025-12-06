@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cash Sim: Christmas Fix 🎄</title>
+    <title>Cash Sim: FIXED 🛠️</title>
     <link rel="stylesheet" href="cosmic.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -11,107 +11,99 @@
 
     <div id="particles-container"></div>
 
-    <div class="game-wrapper">
+    <div class="game-container">
+        
         <header>
             <h1>💵 CASH SIMULATOR</h1>
-            
-            <div class="stats-row">
-                <span style="color: #ff4444;">REBIRTH: <b id="ui-rebirth">0</b></span>
-                <span style="color: gold;">MNOŻNIK: x<b id="ui-mult">1.00</b></span>
+            <div class="stats-bar">
+                <div>REBIRTH: <b id="ui-rebirth" style="color: red;">0</b></div>
+                <div>MNOŻNIK: <b id="ui-mult" style="color: gold;">x1.0</b></div>
             </div>
-
             <div class="currencies">
-                <div class="curr-box money">💵 <span id="ui-money">0</span></div>
-                <div class="curr-box rc">🪙 <span id="ui-rc">0</span></div>
+                <div class="money">$ <span id="ui-money">0</span></div>
+                <div class="rc">RC <span id="ui-rc">0</span></div>
             </div>
-            
-            <div class="mps-info">
-                MPS: <span id="ui-mps">0</span> $/s 
-                <small style="color: #0f0" id="ui-mps-boost"></small>
-            </div>
+            <div class="mps">MPS: <span id="ui-mps">0</span>/s</div>
         </header>
 
-        <div class="combo-container">
-            <div id="combo-text">COMBO x1.0</div>
+        <div class="combo-box">
             <div id="combo-fill"></div>
+            <span id="combo-text">COMBO x1.0</span>
         </div>
 
-        <div id="tab-game" class="tab-content active">
-            <div class="click-area">
-                <div id="btn-wrapper" class="btn-wrapper">
-                    <button id="main-btn" onclick="handleClick(event)">$</button>
-                </div>
-                
-                <div class="click-info">
-                    Moc: <span id="ui-click-power">1</span> $
-                </div>
-                
-                <div id="active-pets" class="active-pets"></div>
-            </div>
-        </div>
-
-        <div id="tab-event" class="tab-content">
-            <div class="event-header">
-                <h2>❄️ Mikołajkowy Event ❄️</h2>
-                <div class="timer">KONIEC ZA: <span id="event-timer">47:59:59</span></div>
-                <p>Rzeczy z eventu zostają po Rebirth!</p>
-            </div>
-            <div id="list-event"></div>
-        </div>
-
-        <div id="tab-upgrades" class="tab-content">
-            <h2>🛠️ Ulepszenia</h2>
-            <div id="list-upgrades"></div>
-        </div>
-
-        <div id="tab-pets" class="tab-content">
-            <h2>🤖 Cyber-Zoo (Pety)</h2>
-            <div id="list-pets"></div>
-        </div>
-
-        <div id="tab-accessories" class="tab-content">
-            <h2>🎀 Akcesoria Przycisku</h2>
-            <p style="color:#aaa; font-size:0.8rem; text-align:center;">Ozdoby dają mnożnik i zostają na zawsze!</p>
-            <div id="list-accessories"></div>
-        </div>
-
-        <div id="tab-skins" class="tab-content">
-            <h2>🎨 Skiny Przycisku</h2>
-            <div id="list-skins"></div>
-        </div>
-
-        <div id="tab-rebirth" class="tab-content">
-            <div class="rebirth-panel">
-                <h2>☢️ STREFA ODRODZEŃ ☢️</h2>
-                <p>Resetuje kasę i zwykłe ulepszenia.</p>
-                <p style="color: #0f0; font-weight: bold;">ZACHOWUJESZ: Skiny, Akcesoria, Pety Eventowe, Auto-Clicker!</p>
-                <p>Zyskasz: <b style="color: gold;">5 RC</b> za każdy poziom.</p>
-                
-                <div class="rebirth-buttons">
-                    <button class="r-btn" onclick="doMultiRebirth(1)">
-                        1x <br><small id="cost-r-1">100K</small>
-                    </button>
-                    <button class="r-btn" onclick="doMultiRebirth(3)">
-                        3x <br><small id="cost-r-3">???</small>
-                    </button>
-                    <button class="r-btn" onclick="doMultiRebirth(10)">
-                        10x <br><small id="cost-r-10">???</small>
-                    </button>
+        <main id="main-view">
+            <div id="view-game" class="view-content active">
+                <div class="center-stage">
+                    <div id="btn-container">
+                        <button id="main-btn" onclick="clickBtn(event)">$</button>
+                        <div id="pets-orbit-container"></div>
+                    </div>
+                    <div class="click-power">Moc: <span id="ui-click">1</span> $</div>
                 </div>
             </div>
-        </div>
+
+            <div id="view-event" class="view-content">
+                <div class="event-banner">
+                    <h2>❄️ EVENT ŚWIĄTECZNY ❄️</h2>
+                    <div id="event-timer">00:00:00</div>
+                    <p>Skin i Pety zostają na zawsze!</p>
+                </div>
+                <div id="shop-event" class="shop-list"></div>
+            </div>
+
+            <div id="view-upgrades" class="view-content">
+                <h2>🛠️ Ulepszenia</h2>
+                <div id="shop-upgrades" class="shop-list"></div>
+            </div>
+
+            <div id="view-pets" class="view-content">
+                <h2>🤖 Cyber-Zoo</h2>
+                <div id="shop-pets" class="shop-list"></div>
+            </div>
+
+            <div id="view-accessories" class="view-content">
+                <h2>🎀 Akcesoria (Mnożnik)</h2>
+                <div id="shop-accessories" class="shop-list"></div>
+            </div>
+
+            <div id="view-skins" class="view-content">
+                <h2>🎨 Skiny</h2>
+                <div id="shop-skins" class="shop-list"></div>
+            </div>
+
+            <div id="view-rebirth" class="view-content">
+                <div class="rebirth-ui">
+                    <h2>☢️ STREFA ODRODZEŃ ☢️</h2>
+                    <p>Resetuje kasę i zwykłe ulepszenia.</p>
+                    <p style="color: lime;">ZACHOWUJESZ: Skiny, Pety Eventowe, Akcesoria!</p>
+                    
+                    <div class="rebirth-options">
+                        <button class="r-btn" onclick="buyRebirth(1)">
+                            1x <br> <small id="cost-r1">100K</small>
+                        </button>
+                        <button class="r-btn" onclick="buyRebirth(3)">
+                            3x <br> <small id="cost-r3">???</small>
+                        </button>
+                        <button class="r-btn gold" onclick="buyRebirth(10)">
+                            10x <br> <small id="cost-r10">???</small>
+                        </button>
+                    </div>
+                    <p class="reward-text">Nagroda: 5 RC za każdy poziom</p>
+                </div>
+            </div>
+        </main>
+
+        <nav>
+            <button onclick="setView('game')" class="active"><i class="fa-solid fa-gamepad"></i></button>
+            <button onclick="setView('event')" style="color: cyan;"><i class="fa-regular fa-snowflake"></i></button>
+            <button onclick="setView('upgrades')">UPG</button>
+            <button onclick="setView('pets')">PET</button>
+            <button onclick="setView('accessories')">ACC</button>
+            <button onclick="setView('skins')">SKIN</button>
+            <button onclick="setView('rebirth')" style="color: red;">☢️</button>
+        </nav>
 
     </div>
-
-    <nav class="nav-bar">
-        <button class="nav-btn active" onclick="switchTab('game', this)"><i class="fa-solid fa-gamepad"></i></button>
-        <button class="nav-btn event-btn" onclick="switchTab('event', this)"><i class="fa-regular fa-snowflake"></i></button>
-        <button class="nav-btn" onclick="switchTab('upgrades', this)">UPG</button>
-        <button class="nav-btn" onclick="switchTab('pets', this)">PET</button>
-        <button class="nav-btn" onclick="switchTab('accessories', this)">ACC</button>
-        <button class="nav-btn" onclick="switchTab('skins', this)">SKIN</button>
-        <button class="nav-btn" onclick="switchTab('rebirth', this)" style="color:red;">☢️</button>
-    </nav>
 
     <script src="cosmic.js"></script>
 </body>
