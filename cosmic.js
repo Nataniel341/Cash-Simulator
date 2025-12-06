@@ -4,9 +4,9 @@
     
 // PETY (Zwykłe + Eventowe)
 const PETS_DATA = [
-    { id: 'p_event1', name: '🧝 Elf Pomocnik', cost: 10000, mps: 200, mult: 0.05, icon: '🧝', desc: '[EVENT] Mały ale pracowity!' },
-    { id: 'p1', name: 'Nano Dron', cost: 50000, mps: 500, mult: 0.15, icon: '🚁', desc: 'Standardowy dron.' },
-    { id: 'p2', name: 'Robo-Koparka', cost: 500000, mps: 3000, mult: 0.5, icon: '🐕‍🦺', desc: 'Maszyna do kasy.' },
+    { id: 'p_event1', name: '🧝 Elf Pomocnik', cost: 5000, mps: 200, mult: 0.05, icon: '🧝', desc: '[EVENT] Mały ale pracowity!' },
+    { id: 'p1', name: 'Nano Dron', cost: 10000, mps: 500, mult: 0.15, icon: '🚁', desc: 'Standardowy dron.' },
+    { id: 'p2', name: 'Robo-Koparka', cost: 50000, mps: 3000, mult: 0.5, icon: '🐕‍🦺', desc: 'Maszyna do kasy.' },
     { id: 'p_event2', name: '🛷 Sanie Mikołaja', cost: 2500000, mps: 15000, mult: 0.8, icon: '🛷', desc: '[EVENT] Roznosi prezenty (i gotówkę).' },
     { id: 'p3', name: 'Kwantowy Haker', cost: 5000000, mps: 20000, mult: 1.0, icon: '💻', desc: 'Legendarny Haker.' },
 ];
@@ -689,5 +689,6 @@ function loadGame() {
 
 // Start
 init();
+
 
 
