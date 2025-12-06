@@ -1,694 +1,417 @@
-/* === LOGIKA GRY (CORE) === */
-    
-// --- KONFIGURACJA DANYCH GRY ---
-    
-// PETY (Zwykłe + Eventowe)
-const PETS_DATA = [
-    { id: 'p_event1', name: '🧝 Elf Pomocnik', cost: 5000, mps: 200, mult: 0.05, icon: '🧝', desc: '[EVENT] Mały ale pracowity!' },
-    { id: 'p1', name: 'Nano Dron', cost: 10000, mps: 500, mult: 0.15, icon: '🚁', desc: 'Standardowy dron.' },
-    { id: 'p2', name: 'Robo-Koparka', cost: 50000, mps: 3000, mult: 0.5, icon: '🐕‍🦺', desc: 'Maszyna do kasy.' },
-    { id: 'p_event2', name: '🛷 Sanie Mikołaja', cost: 2500000, mps: 15000, mult: 0.8, icon: '🛷', desc: '[EVENT] Roznosi prezenty (i gotówkę).' },
-    { id: 'p3', name: 'Kwantowy Haker', cost: 5000000, mps: 20000, mult: 1.0, icon: '💻', desc: 'Legendarny Haker.' },
+/* === CASH SIMULATOR: CHRISTMAS FIX === */
+
+// --- DANE GRY ---
+
+const EVENT_DURATION = 48 * 60 * 60 * 1000; // 48h
+
+const UPGRADES = [
+    { id: 'click', name: 'Moc Kliknięcia', cost: 50, costMult: 1.5, type: 'click' },
+    { id: 'combo', name: 'Pojemność Combo', cost: 300, costMult: 1.8, type: 'special' },
+    { id: 'global', name: 'Mnożnik Globalny', cost: 1000, costMult: 2.0, type: 'special', bonus: 0.05 },
+    { id: 'mps', name: 'Szybkość MPS', cost: 5000, costMult: 2.5, type: 'special', bonus: 0.10 }, // Naprawione 10%
+    { id: 'crit', name: 'Szansa Krytyczna', cost: 15000, costMult: 3.0, type: 'special' }
 ];
 
-// SKINY (Zwykłe + Eventowe)
-const SKINS_BTN_DATA = [
-    { id: 'default', name: 'Klasyk', cost: 0, mult: 0, class: '' },
-    { id: 'neon', name: 'Neon Pink', cost: 5, mult: 0.05, class: 'skin-neon' }, 
-    { id: 'gold', name: 'Rich Gold', cost: 20, mult: 0.15, class: 'skin-gold' }, 
-    { id: 'matrix', name: 'The Matrix', cost: 50, mult: 0.3, class: 'skin-matrix' }, 
-    { id: 'fire', name: 'Hellfire', cost: 100, mult: 0.5, class: 'skin-fire' },
-    // EVENT SKIN
-    { id: 'winter', name: '🎅 Santa Winter', cost: 2000000, mult: 0.30, class: 'skin-winter', currency: 'money' } // Koszt w $
+const PETS = [
+    // EVENTOWE (Nie znikają)
+    { id: 'p_elf', name: '🧝 Elf', cost: 10000, mps: 200, mult: 0.05, event: true },
+    { id: 'p_sleigh', name: '🛷 Sanie', cost: 2500000, mps: 25000, mult: 0.8, event: true },
+    // ZWYKŁE (Znikają po rebirth)
+    { id: 'p1', name: 'Dron', cost: 50000, mps: 500, mult: 0.15 },
+    { id: 'p2', name: 'Pies', cost: 500000, mps: 3000, mult: 0.5 },
+    { id: 'p3', name: 'Koparka', cost: 5000000, mps: 20000, mult: 1.0 }
 ];
 
-// Ulepszenia za Rebirth Coins (RC)
-const RC_UPGRADES = [
-    { id: 'rc_click', name: '🚀 Super Klik', cost: 5, current: 0, max: 10, icon: '✨', effect: (lvl) => lvl * 0.1, desc: 'Zwiększa bazową moc kliknięcia o 10% za poziom.' },
-    { id: 'rc_mps', name: '⚡ Hiper Pasyw', cost: 10, current: 0, max: 5, icon: '🔥', effect: (lvl) => lvl * 0.25, desc: 'Zwiększa MPS o 25% za poziom.' },
-    { id: 'rc_mult_base', name: '🌟 Bonus Rebirth', cost: 25, current: 0, max: 1, icon: '⭐', effect: (lvl) => lvl * 1.0, desc: 'Podwaja bazowy mnożnik Rebirth.' }
+const SKINS = [
+    { id: 'default', name: 'Klasyk', cost: 0, mult: 0 },
+    { id: 'winter', name: '🎅 Winter', cost: 2000000, mult: 0.30, event: true }, // 2MLN, 30%
+    { id: 'gold', name: 'Gold', cost: 20, mult: 0.15, currency: 'rc' },
+    { id: 'matrix', name: 'Matrix', cost: 50, mult: 0.3, currency: 'rc' }
+];
+
+const ACCESSORIES = [
+    { id: 'butterfly', name: '🦋 Motyle', cost: 100000, mult: 0.1, class: 'acc-butterfly' },
+    { id: 'tree', name: '🌲 Drzewa', cost: 500000, mult: 0.2, class: 'acc-tree' },
+    { id: 'fire', name: '🔥 Ogień', cost: 5000000, mult: 0.5, class: 'acc-fire' }
 ];
 
 // --- STAN GRY ---
 let game = {
     money: 0,
-    rebirthCoins: 0,
-    rebirthCount: 0, 
-    clickLevel: 1, 
-    comboLevel: 1, 
-    globalMultLevel: 0,
-    mpsSpeedLevel: 0,
-    bonusChanceLevel: 0,
-    pets: { p_event1:0, p1:0, p2:0, p_event2:0, p3:0 }, 
-    ownedSkinsBtn: ['default'],
-    equippedSkinBtn: 'default',
-    rcUpgrades: { rc_click: 0, rc_mps: 0, rc_mult_base: 0 },
-    autoClicker: false // Nowe: czy auto-clicker kupiony
+    rc: 0,
+    rebirthCount: 0,
+    
+    // Poziomy ulepszeń (Resetowalne)
+    upgrades: { click: 1, combo: 1, global: 0, mps: 0, crit: 0 },
+    
+    // Ekwipunek (Pety - Liczba posiadanych)
+    pets: {}, 
+    
+    // Permanentne (Nie resetować!)
+    ownedSkins: ['default'],
+    equippedSkin: 'default',
+    ownedAccessories: [],
+    equippedAccessory: null,
+    autoClicker: false,
+    
+    startTime: Date.now()
 };
 
-// --- ZMIENNE TYMCZASOWE ---
-let comboHeat = 0;
+// Zmienne tymczasowe
+let combo = 0;
 let comboMaxBase = 100;
 let isComboActive = false;
 let autoClickerInterval = null;
 
-// --- INICJALIZACJA ---
+// --- INIT ---
 function init() {
     loadGame();
     
-    RC_UPGRADES.forEach(upg => {
-        upg.current = game.rcUpgrades[upg.id] || 0; 
-    });
-    
-    // Pętla główna (10 razy na sekundę)
-    setInterval(gameLoop, 100); 
-    
-    // Auto-clicker interval (1 raz na sekundę)
+    // Inicjalizacja pustych petów
+    PETS.forEach(p => { if(game.pets[p.id] === undefined) game.pets[p.id] = 0; });
+
+    setInterval(gameLoop, 100);
+    setInterval(updateTimer, 1000);
+    setInterval(saveGame, 5000); // Autosave co 5s
+
     if(game.autoClicker) startAutoClicker();
 
-    // Event timer logic
-    setInterval(updateEventTimer, 1000);
-
-    window.addEventListener('beforeunload', saveGame);
-    
-    renderAllShops();
-    applySkin(game.equippedSkinBtn, 'btn');
-    updateUI(); 
+    applyVisuals();
+    renderAll();
+    updateUI();
 }
 
-/* === CORE LOOP & MECHANIKA === */
-
+// --- LOGIKA ---
 function handleClick(e) {
-    const rcClickUpgrade = RC_UPGRADES.find(u => u.id === 'rc_click');
-    let rcClickBonus = rcClickUpgrade ? rcClickUpgrade.effect(rcClickUpgrade.current) : 0;
-    
-    let clickBase = 1 + game.clickLevel + rcClickBonus;
-    
-    let totalMult = calculateTotalMultiplier();
-    
-    let comboBonus = isComboActive ? 2 : 1;
-    
-    let bonusChance = game.bonusChanceLevel * 0.01;
-    let critBonus = 1;
-    let isCrit = false;
-    
-    if (Math.random() < bonusChance) {
-        critBonus = 10;
-        isCrit = true;
-    }
+    let val = calculateClick();
+    let isCrit = Math.random() < (game.upgrades.crit * 0.01);
+    if(isCrit) val *= 10;
 
-    let amount = clickBase * totalMult * comboBonus * critBonus;
-    game.money += amount;
+    game.money += val;
+    
+    // Combo
+    combo += 10;
+    let maxC = comboMaxBase + (game.upgrades.combo * 20);
+    if(combo > maxC) combo = maxC;
 
-    comboHeat += 15; 
-    let currentComboMax = comboMaxBase + (game.comboLevel * 20);
-    if(comboHeat > currentComboMax) comboHeat = currentComboMax;
-
-    // Tekst tylko jeśli kliknięcie fizyczne (e istnieje)
-    if (e && isCrit) {
-        createFloatingText(e, `CRIT X${critBonus}! +${formatNumber(Math.floor(amount))}$`, 'var(--neon-gold)');
-    } else if (e) {
-        createFloatingText(e, `+${formatNumber(Math.floor(amount))}$`, 'var(--neon-green)');
-    }
+    if(e) spawnParticle(e.clientX, e.clientY, `+${format(val)}`, isCrit ? 'gold' : '#0f0');
     
     updateUI();
-    saveGame(); 
 }
 
-function startAutoClicker() {
-    if (autoClickerInterval) clearInterval(autoClickerInterval);
-    autoClickerInterval = setInterval(() => {
-        // Symuluj kliknięcie (bez eventu 'e', więc bez tekstu latającego, żeby nie lagowało)
-        handleClick(null);
-    }, 1000);
-}
-
-function updateEventTimer() {
-    // Prosta symulacja 48h (odlicza w kółko)
-    const now = new Date();
-    const hours = 47 - (now.getHours() % 48);
-    const minutes = 59 - now.getMinutes();
-    const seconds = 59 - now.getSeconds();
-    document.getElementById('event-countdown').innerText = 
-        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
-
-function gameLoop() {
-    let mps = calculateMPS();
-    
-    // NAPRAWA MPS: mpsSpeedLevel daje 10% za poziom (0.1)
-    let mpsSpeedMult = 1 + (game.mpsSpeedLevel * 0.1);
-    
-    const rcMpsUpgrade = RC_UPGRADES.find(u => u.id === 'rc_mps');
-    let rcMpsMult = 1 + (rcMpsUpgrade ? rcMpsUpgrade.effect(rcMpsUpgrade.current) : 0);
-
-    let totalMult = calculateTotalMultiplier();
-
-    // Całkowity mnożnik dla pasywnego dochodu
-    let finalPassiveMult = mpsSpeedMult * rcMpsMult * totalMult;
-
-    let passiveAmount = (mps * finalPassiveMult) / 10;
-    
-    if(passiveAmount > 0) {
-        game.money += passiveAmount;
-    }
-
-    // Obsługa Combo
-    let currentComboMax = comboMaxBase + (game.comboLevel * 20);
-    if(comboHeat > 0) {
-        comboHeat -= (1.5 / game.comboLevel); 
-    } else {
-        comboHeat = 0;
-    }
-
-    const comboFill = document.getElementById('combo-fill');
-    const comboBox = document.getElementById('combo-box');
-    
-    if(comboHeat >= currentComboMax * 0.9 && !isComboActive) {
-        isComboActive = true;
-        comboBox.classList.add('combo-active');
-    } 
-    if(comboHeat < currentComboMax * 0.3 && isComboActive) {
-        isComboActive = false;
-        comboBox.classList.remove('combo-active');
-    }
-    
-    comboFill.style.width = (comboHeat / currentComboMax * 100) + "%";
-
-    updateUI();
-}
-
-/* === ZAKUPY === */
-
-function buyClickUpgrade() {
-    let cost = getUpgradeCost('click', game.clickLevel);
-    if(game.money >= cost) {
-        game.money -= cost;
-        game.clickLevel++;
-        updateUI();
-        saveGame();
-    }
-}
-function buyComboUpgrade() {
-    let cost = getUpgradeCost('combo', game.comboLevel);
-    if(game.money >= cost) {
-        game.money -= cost;
-        game.comboLevel++;
-        updateUI();
-        saveGame();
-    }
-}
-function buyGlobalMultiplier() {
-    let cost = getUpgradeCost('global-mult', game.globalMultLevel);
-    if(game.money >= cost) {
-        game.money -= cost;
-        game.globalMultLevel++;
-        updateUI();
-        saveGame();
-    }
-}
-function buyMpsSpeed() {
-    let cost = getUpgradeCost('mps-speed', game.mpsSpeedLevel);
-    if(game.money >= cost) {
-        game.money -= cost;
-        game.mpsSpeedLevel++;
-        updateUI();
-        saveGame();
-    }
-}
-function buyBonusChance() {
-    let cost = getUpgradeCost('bonus-chance', game.bonusChanceLevel);
-    if(game.money >= cost) {
-        game.money -= cost;
-        game.bonusChanceLevel++;
-        updateUI();
-        saveGame();
-    }
-}
-
-function buyRCUpgrade(id) {
-    let upg = RC_UPGRADES.find(u => u.id === id);
-    if (!upg || upg.current >= upg.max) return;
-    let cost = upg.cost * (upg.current + 1);
-    if (game.rebirthCoins >= cost) {
-        game.rebirthCoins -= cost;
-        upg.current++;
-        game.rcUpgrades[upg.id] = upg.current;
-        renderAllShops();
-        updateUI();
-        saveGame();
-    }
-}
-
-function buyPet(id) {
-    let pet = PETS_DATA.find(p => p.id === id);
-    if(game.pets[id] > 0) return; 
-    if(game.money >= pet.cost) {
-        game.money -= pet.cost;
-        game.pets[id] = 1; 
-        renderAllShops();
-        updateUI();
-        saveGame();
-    }
-}
-
-// Kupowanie skinów (Obsługuje RC i Money)
-function buySkin(id) {
-    let skin = SKINS_BTN_DATA.find(s => s.id === id);
-    let ownedList = game.ownedSkinsBtn;
-    
-    // Rozróżnienie waluty
-    if (skin.currency === 'money') {
-        if (game.money >= skin.cost && !ownedList.includes(id)) {
-            game.money -= skin.cost;
-            ownedList.push(id);
-            renderAllShops();
-            updateUI();
-            saveGame();
-        }
-    } else {
-        // Domyślnie RC
-        if (game.rebirthCoins >= skin.cost && !ownedList.includes(id)) {
-            game.rebirthCoins -= skin.cost;
-            ownedList.push(id);
-            renderAllShops();
-            updateUI();
-            saveGame();
-        }
-    }
-}
-
-// EVENT: Auto Clicker
-function buyAutoClicker() {
-    let cost = 1000000; // 1M $
-    if (!game.autoClicker && game.money >= cost) {
-        game.money -= cost;
-        game.autoClicker = true;
-        startAutoClicker();
-        renderAllShops(); // Odśwież widok eventu
-        updateUI();
-        saveGame();
-    }
-}
-
-function equipSkin(id, type) {
-    game.equippedSkinBtn = id;
-    applySkin(id, 'btn');
-    renderAllShops();
-    updateUI(); 
-    saveGame();
-}
-
-function applySkin(id, type) {
-    let btn = document.getElementById('main-btn');
-    let skin = SKINS_BTN_DATA.find(s => s.id === id);
-    if (!skin) return; 
-    btn.className = '';
-    if(skin.class) btn.classList.add(skin.class);
-}
-
-/* === REBIRTH SYSTEM === */
-function getRebirthCost() {
-    // 100k start, wzrost 50%
-    let cost = 100000 * Math.pow(1.5, game.rebirthCount);
-    return Math.floor(cost);
-}
-
-function getRebirthGain() {
-    let cost = getRebirthCost();
-    if(game.money < cost) return 0; 
-    return 5;
-}
-
-function doRebirth() {
-    let cost = getRebirthCost();
-    let gain = getRebirthGain();
-
-    if(gain > 0) {
-        if(confirm(`ZROBIĆ REBIRTH #${game.rebirthCount + 1}? Koszt: ${formatNumber(cost)}$. Zyskasz ${gain} RC!`)) {
-            game.rebirthCoins += gain;
-            game.rebirthCount++; 
-            
-            // RESET (Zachowujemy Event AutoClicker i Skiny)
-            game.money = 0;
-            game.clickLevel = 1;
-            game.comboLevel = 1;
-            game.globalMultLevel = 0;
-            game.mpsSpeedLevel = 0;
-            game.bonusChanceLevel = 0;
-            game.pets = { p_event1:0, p1:0, p2:0, p_event2:0, p3:0 }; 
-            comboHeat = 0;
-            // AutoClicker zostaje! (jest "permanentny" w evencie)
-            
-            saveGame(); 
-            location.reload(); 
-        }
-    } else {
-        alert(`Potrzebujesz minimum ${formatNumber(cost)}$!`);
-    }
-}
-
-/* === UI === */
-
-function switchTab(tabName, btn) {
-    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
-    document.getElementById('tab-' + tabName).classList.add('active');
-    btn.classList.add('active');
-    updateUI(); 
-}
-
-function getUpgradeCost(id, level) {
-    switch(id) {
-        case 'click': return Math.floor(50 * Math.pow(1.5, level - 1));
-        case 'combo': return Math.floor(300 * Math.pow(1.8, level - 1));
-        case 'global-mult': return Math.floor(1000 * Math.pow(2, level));
-        case 'mps-speed': return Math.floor(5000 * Math.pow(2.5, level));
-        case 'bonus-chance': return Math.floor(15000 * Math.pow(3, level));
-        default: return 9999999999;
-    }
-}
-
-function updateUI() {
-    document.getElementById('ui-money').innerText = formatNumber(Math.floor(game.money));
-    document.getElementById('ui-rc').innerText = game.rebirthCoins;
-    
-    // Obliczanie widocznego MPS
-    let rawMps = calculateMPS();
-    let speedMult = 1 + (game.mpsSpeedLevel * 0.1);
-    let rcMpsMult = 1 + (RC_UPGRADES[1].current * 0.25);
-    let totalMult = calculateTotalMultiplier();
-    
-    // Pokazujemy realny MPS jaki gracz dostaje
-    let realMps = rawMps * speedMult * rcMpsMult * totalMult;
-    
-    document.getElementById('ui-mps').innerText = formatNumber(Math.floor(realMps));
-    document.getElementById('ui-mps-boost').innerText = `(+${((speedMult-1)*100).toFixed(0)}%)`; // Pokazuje boost z upgrade'u
-    document.getElementById('ui-total-mult').innerText = totalMult.toFixed(2);
-    document.getElementById('ui-rebirth-count').innerText = game.rebirthCount;
-    
-    const rcClickUpgrade = RC_UPGRADES.find(u => u.id === 'rc_click');
-    let rcClickBonus = rcClickUpgrade ? rcClickUpgrade.effect(rcClickUpgrade.current) : 0;
-    document.getElementById('click-base').innerText = (1 + game.clickLevel + rcClickBonus).toFixed(1);
-
-    // Poziomy
-    document.getElementById('lvl-click').innerText = game.clickLevel;
-    document.getElementById('lvl-combo').innerText = game.comboLevel;
-    document.getElementById('lvl-global-mult').innerText = game.globalMultLevel;
-    document.getElementById('lvl-mps-speed').innerText = game.mpsSpeedLevel;
-    document.getElementById('lvl-bonus-chance').innerText = game.bonusChanceLevel;
-
-    // Koszty UPG
-    const upgData = [
-        { id: 'btn-upg-click', level: game.clickLevel, levelId: 'click', currency: game.money, nav: 'nav-upgrades' },
-        { id: 'btn-upg-combo', level: game.comboLevel, levelId: 'combo', currency: game.money, nav: 'nav-upgrades' },
-        { id: 'btn-upg-global-mult', level: game.globalMultLevel, levelId: 'global-mult', currency: game.money, nav: 'nav-upgrades' },
-        { id: 'btn-upg-mps-speed', level: game.mpsSpeedLevel, levelId: 'mps-speed', currency: game.money, nav: 'nav-upgrades' },
-        { id: 'btn-upg-bonus-chance', level: game.bonusChanceLevel, levelId: 'bonus-chance', currency: game.money, nav: 'nav-upgrades' }
-    ];
-    
-    let alertFlags = { 'nav-event': false, 'nav-upgrades': false, 'nav-pets': false, 'nav-skins': false, 'nav-coinshop': false, 'nav-rebirth': false };
-
-    upgData.forEach(item => {
-        let cost = getUpgradeCost(item.levelId, item.level);
-        document.getElementById('cost-' + item.levelId).innerText = formatNumber(cost);
-        if (checkAfford(item.id, cost, item.currency)) alertFlags[item.nav] = true;
-    });
-    
-    if (checkPetsReady()) alertFlags['nav-pets'] = true;
-    if (checkRCSkinsReady()) alertFlags['nav-skins'] = true;
-    if (checkRCUpgradesReady()) alertFlags['nav-coinshop'] = true;
-    if (getRebirthGain() > 0) alertFlags['nav-rebirth'] = true;
-    if (checkEventReady()) alertFlags['nav-event'] = true;
-    
-    Object.keys(alertFlags).forEach(navId => {
-        const navBtn = document.getElementById(navId);
-        if (navBtn) {
-            if (alertFlags[navId] && !navBtn.classList.contains('active')) navBtn.classList.add('alert');
-            else navBtn.classList.remove('alert');
-        }
-    });
-
-    // Rebirth info
-    document.getElementById('rebirth-gain').innerText = getRebirthGain();
-    document.getElementById('rebirth-req-display').innerText = formatNumber(getRebirthCost());
-    
-    let rBtn = document.getElementById('rebirth-btn');
-    if(getRebirthGain() > 0) rBtn.style.opacity = 1;
-    else rBtn.style.opacity = 0.5;
-    
-    renderActivePets(); 
-    renderAllShops();
-}
-
-function checkPetsReady() {
-    return PETS_DATA.some(pet => {
-        // Pomiń pety eventowe w tej zakładce, jeśli są w innej (ale tutaj są w jednej liście danych)
-        // Sprawdź czy to nie event pet
-        if (pet.id.includes('event')) return false; 
-        return game.pets[pet.id] === 0 && game.money >= pet.cost;
-    });
-}
-function checkEventReady() {
-    // Sprawdź skin
-    let skin = SKINS_BTN_DATA.find(s => s.id === 'winter');
-    if (!game.ownedSkinsBtn.includes('winter') && game.money >= skin.cost) return true;
-    // Sprawdź auto clicker
-    if (!game.autoClicker && game.money >= 1000000) return true;
-    // Sprawdź pety eventowe
-    if (game.pets['p_event1'] === 0 && game.money >= 10000) return true;
-    if (game.pets['p_event2'] === 0 && game.money >= 2500000) return true;
-    return false;
-}
-
-function checkRCSkinsReady() {
-    return SKINS_BTN_DATA.some(skin => !skin.currency && !game.ownedSkinsBtn.includes(skin.id) && game.rebirthCoins >= skin.cost);
-}
-function checkRCUpgradesReady() {
-    return RC_UPGRADES.some(upg => {
-        let cost = upg.cost * (upg.current + 1);
-        return upg.current < upg.max && game.rebirthCoins >= cost;
-    });
-}
-
-function formatNumber(num) {
-    if (num >= 1e12) return (num / 1e12).toFixed(2) + 'T';
-    if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
-    if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
-    if (num >= 1e3) return (num / 1e3).toFixed(1) + 'K';
-    return Math.floor(num).toString();
-}
-
-function checkAfford(id, cost, currency) {
-    let el = document.getElementById(id);
-    let canAfford = currency >= cost;
-    if(el) {
-        if (id.includes('rc') || (id.includes('skin') && !id.includes('winter'))) { 
-            if(canAfford) el.classList.add('can-afford-rc');
-            else el.classList.remove('can-afford-rc');
-        } else { // $
-            if(canAfford) el.classList.add('can-afford');
-            else el.classList.remove('can-afford');
-        }
-    }
-    return canAfford;
+function calculateClick() {
+    let base = 1 + game.upgrades.click;
+    let mult = calculateTotalMult();
+    let comboM = isComboActive ? 2 : 1;
+    return base * mult * comboM;
 }
 
 function calculateMPS() {
     let mps = 0;
-    PETS_DATA.forEach(pet => {
-        if(game.pets[pet.id] > 0) mps += pet.mps;
-    });
+    PETS.forEach(p => { if(game.pets[p.id] > 0) mps += p.mps; });
     return mps;
 }
 
-function calculateTotalMultiplier() {
+function calculateTotalMult() {
     let mult = 1.0;
+    mult += (game.rebirthCount * 0.5); // Rebirth bonus
     
-    PETS_DATA.forEach(pet => {
-        if(game.pets[pet.id] > 0) mult += pet.mult;
-    });
+    // Upgrades
+    mult += (game.upgrades.global * 0.05); // Global 5%
     
-    game.ownedSkinsBtn.forEach(id => {
-        let skin = SKINS_BTN_DATA.find(s => s.id === id);
-        if (skin) mult += skin.mult;
+    // Pets mult
+    PETS.forEach(p => { if(game.pets[p.id] > 0) mult += p.mult; });
+    
+    // Skins mult
+    game.ownedSkins.forEach(id => {
+        let s = SKINS.find(x => x.id === id);
+        if(s) mult += s.mult;
     });
 
-    mult += (game.globalMultLevel * 0.05);
-
-    const rcMultBaseUpgrade = RC_UPGRADES.find(u => u.id === 'rc_mult_base');
-    let rcMultBase = 1 + (rcMultBaseUpgrade ? rcMultBaseUpgrade.effect(rcMultBaseUpgrade.current) : 0);
-    mult *= rcMultBase;
+    // Accessories mult
+    game.ownedAccessories.forEach(id => {
+        let a = ACCESSORIES.find(x => x.id === id);
+        if(a) mult += a.mult;
+    });
 
     return mult;
 }
 
-function renderActivePets() {
-    const display = document.getElementById('active-pets-display');
-    display.innerHTML = '';
-    let count = 0;
-    PETS_DATA.forEach(pet => {
-        if (game.pets[pet.id] > 0) {
-            let petIcon = document.createElement('span');
-            petIcon.className = 'pet-icon';
-            petIcon.innerText = pet.icon;
-            petIcon.style.animationDelay = `${count * 0.15}s`;
-            display.appendChild(petIcon);
-            count++;
-        }
-    });
+function gameLoop() {
+    let mps = calculateMPS();
+    // Fix MPS Upgrade: mnoży podstawę o (1 + poziom * 0.1)
+    let speedMult = 1 + (game.upgrades.mps * 0.1); 
+    let totalMult = calculateTotalMultiplier();
+    
+    let finalMPS = mps * speedMult * totalMult;
+    
+    if(finalMPS > 0) game.money += finalMPS / 10;
+
+    // Combo Decay
+    if(combo > 0) combo -= 0.5; else combo = 0;
+    let maxC = comboMaxBase + (game.upgrades.combo * 20);
+    
+    const fill = document.getElementById('combo-fill');
+    if(combo >= maxC * 0.9) isComboActive = true;
+    if(combo < maxC * 0.3) isComboActive = false;
+    
+    fill.style.width = (combo/maxC*100) + '%';
+    document.getElementById('combo-text').innerText = isComboActive ? "MAX COMBO x2" : "COMBO x1";
+
+    updateUI();
 }
 
-function renderEventTab() {
-    const list = document.getElementById('event-list');
-    list.innerHTML = '';
+function startAutoClicker() {
+    if(autoClickerInterval) clearInterval(autoClickerInterval);
+    autoClickerInterval = setInterval(() => { handleClick(null); }, 1000);
+}
 
-    // 1. AUTO CLICKER
-    let acCost = 1000000;
-    let acHtml = '';
-    if (game.autoClicker) {
-        acHtml = `<button class="btn-buy purchased" disabled>POSIADANY</button>`;
-    } else {
-        let can = game.money >= acCost;
-        acHtml = `<button class="btn-buy ${can?'can-afford':''}" onclick="buyAutoClicker()">$${formatNumber(acCost)}</button>`;
+// --- REBIRTH SYSTEM (MULTI) ---
+function getRebirthCost(count) {
+    // 100k * 1.5^count
+    return Math.floor(100000 * Math.pow(1.5, count));
+}
+
+function getMultiRebirthCost(amount) {
+    let total = 0;
+    for(let i=0; i<amount; i++) {
+        total += getRebirthCost(game.rebirthCount + i);
     }
-    let acDiv = document.createElement('div');
-    acDiv.className = 'upgrade-card';
-    acDiv.style.border = "1px solid cyan";
-    acDiv.innerHTML = `<div class="upgrade-info"><h3>🤖 Auto-Clicker</h3><p>Klika za Ciebie co 1s! (Permanentny)</p></div>${acHtml}`;
-    list.appendChild(acDiv);
+    return total;
+}
 
-    // 2. WINTER SKIN
-    let skin = SKINS_BTN_DATA.find(s => s.id === 'winter');
-    let owned = game.ownedSkinsBtn.includes('winter');
-    let skinHtml = '';
-    if (owned) {
-        if (game.equippedSkinBtn === 'winter') skinHtml = `<button class="btn-buy" disabled>UBRANE</button>`;
-        else skinHtml = `<button class="btn-buy can-afford" onclick="equipSkin('winter', 'btn')">Ubierz</button>`;
-    } else {
-        let can = game.money >= skin.cost;
-        skinHtml = `<button class="btn-buy ${can?'can-afford':''}" onclick="buySkin('winter')">$${formatNumber(skin.cost)}</button>`;
-    }
-    let skinDiv = document.createElement('div');
-    skinDiv.className = 'upgrade-card';
-    skinDiv.style.border = "1px solid #cc0000";
-    skinDiv.innerHTML = `<div class="upgrade-info"><h3>🎅 Winter Skin (+30%)</h3><p>Unikalny skin Mikołaja.</p></div>${skinHtml}`;
-    list.appendChild(skinDiv);
-
-    // 3. EVENT PETS
-    PETS_DATA.forEach(pet => {
-        if (pet.id.includes('event')) {
-            let isPurchased = game.pets[pet.id] > 0;
-            let btn = isPurchased 
-                ? `<button class="btn-buy purchased" disabled>POSIADANY</button>`
-                : `<button class="btn-buy ${game.money>=pet.cost?'can-afford':''}" onclick="buyPet('${pet.id}')">$${formatNumber(pet.cost)}</button>`;
+function doMultiRebirth(amount) {
+    let cost = getMultiRebirthCost(amount);
+    
+    if(game.money >= cost) {
+        if(confirm(`Kupić ${amount} Odrodzeń za $${format(cost)}?`)) {
+            game.money -= cost;
+            game.rebirthCount += amount;
+            game.rebirthCoins += (5 * amount);
             
-            let pDiv = document.createElement('div');
-            pDiv.className = 'upgrade-card';
-            pDiv.innerHTML = `<div class="upgrade-info"><h3>${pet.icon} ${pet.name}</h3><p>Bonus: +${(pet.mult*100).toFixed(0)}%. MPS: ${formatNumber(pet.mps)}</p></div>${btn}`;
-            list.appendChild(pDiv);
+            // RESET STATÓW (Ale nie permanentnych!)
+            game.money = 0;
+            game.upgrades = { click: 1, combo: 1, global: 0, mps: 0, crit: 0 };
+            
+            // Resetuj tylko ZWYKŁE pety
+            PETS.forEach(p => {
+                if(!p.event) game.pets[p.id] = 0;
+            });
+            
+            saveGame();
+            location.reload();
         }
-    });
-}
-
-function renderPets() {
-    const list = document.getElementById('pets-list');
-    list.innerHTML = '';
-    PETS_DATA.forEach(pet => {
-        if (!pet.id.includes('event')) { // Tylko zwykłe pety
-            let isPurchased = game.pets[pet.id] > 0;
-            let btn = isPurchased 
-                ? `<button class="btn-buy purchased" disabled>POSIADANY</button>`
-                : `<button class="btn-buy ${game.money>=pet.cost?'can-afford':''}" onclick="buyPet('${pet.id}')">$${formatNumber(pet.cost)}</button>`;
-            let div = document.createElement('div');
-            div.className = 'upgrade-card';
-            div.innerHTML = `<div class="upgrade-info"><h3>${pet.icon} ${pet.name}</h3><p>Bonus: +${(pet.mult*100).toFixed(0)}%. MPS: ${formatNumber(pet.mps)}</p></div>${btn}`;
-            list.appendChild(div);
-        }
-    });
-}
-
-function renderSkins() {
-    const listBtn = document.getElementById('skins-btn-list');
-    listBtn.innerHTML = '';
-    SKINS_BTN_DATA.forEach(skin => {
-        // Pomiń skin eventowy w zwykłym sklepie, chyba że już kupiony (wtedy pokaż do ubrania)
-        let owned = game.ownedSkinsBtn.includes(skin.id);
-        if (skin.id === 'winter' && !owned) return;
-
-        let equipped = game.equippedSkinBtn === skin.id;
-        let btnHTML = '';
-        if(equipped) btnHTML = `<button class="btn-buy" disabled>Ubrane</button>`;
-        else if (owned) btnHTML = `<button class="btn-buy can-afford-rc" onclick="equipSkin('${skin.id}', 'btn')">Ubierz</button>`;
-        else btnHTML = `<button class="btn-buy ${game.rebirthCoins>=skin.cost?'can-afford-rc':''}" onclick="buySkin('${skin.id}')">${skin.cost} RC</button>`;
-
-        let div = document.createElement('div');
-        div.className = 'upgrade-card';
-        div.innerHTML = `<div class="upgrade-info"><h3>${skin.name}</h3><p style="color:var(--neon-gold)">Bonus: +${(skin.mult*100).toFixed(0)}%</p></div>${btnHTML}`;
-        listBtn.appendChild(div);
-    });
-}
-
-function renderRCShop() {
-    const list = document.getElementById('rc-shop-list');
-    list.innerHTML = '';
-    RC_UPGRADES.forEach(upg => {
-        let isMax = upg.current >= upg.max;
-        let cost = upg.cost * (upg.current + 1);
-        let btn = isMax 
-            ? `<button class="btn-buy" disabled>MAX</button>`
-            : `<button class="btn-buy ${game.rebirthCoins>=cost?'can-afford-rc':''}" id="btn-buy-${upg.id}" onclick="buyRCUpgrade('${upg.id}')">${cost} RC</button>`;
-        
-        let div = document.createElement('div');
-        div.className = 'upgrade-card';
-        div.innerHTML = `<div class="upgrade-info"><h3>${upg.icon} ${upg.name} (P: ${upg.current})</h3><p>${upg.desc}</p></div>${btn}`;
-        list.appendChild(div);
-    });
-}
-
-function renderAllShops() {
-    renderEventTab();
-    renderPets();
-    renderSkins();
-    renderRCShop();
-}
-
-function createFloatingText(e, text, color) {
-    if (!e) return;
-    const btn = document.getElementById('main-btn');
-    const rect = btn.getBoundingClientRect();
-    let x = rect.left + rect.width / 2;
-    let y = rect.top + rect.height / 2;
-    const el = document.createElement('div');
-    el.className = 'floater';
-    el.innerText = text;
-    let randomX = (Math.random() - 0.5) * 60;
-    el.style.left = (x + randomX) + 'px';
-    el.style.top = (y - 20) + 'px';
-    el.style.color = color;
-    document.body.appendChild(el);
-    setTimeout(() => el.remove(), 1000);
-}
-
-function saveGame() {
-    localStorage.setItem('CashSimulatorV5', JSON.stringify(game));
-}
-
-function loadGame() {
-    let saved = localStorage.getItem('CashSimulatorV5');
-    if(saved) {
-        let parsed = JSON.parse(saved);
-        game = { ...game, ...parsed };
-        
-        // Kompatybilność
-        if (game.autoClicker === undefined) game.autoClicker = false;
-        if (game.pets['p_event1'] === undefined) game.pets['p_event1'] = 0;
-        if (game.pets['p_event2'] === undefined) game.pets['p_event2'] = 0;
+    } else {
+        alert("Za mało kasy!");
     }
 }
 
-// Start
+// --- KUPOWANIE ---
+function buyItem(type, id) {
+    if(type === 'upgrade') {
+        let u = UPGRADES.find(x => x.id === id);
+        let lvl = game.upgrades[id];
+        let cost = Math.floor(u.cost * Math.pow(u.costMult, lvl));
+        if(game.money >= cost) {
+            game.money -= cost;
+            game.upgrades[id]++;
+        }
+    }
+    else if(type === 'pet') {
+        let p = PETS.find(x => x.id === id);
+        if(game.pets[id] > 0) return;
+        if(game.money >= p.cost) {
+            game.money -= p.cost;
+            game.pets[id] = 1;
+        }
+    }
+    else if(type === 'accessory') {
+        let a = ACCESSORIES.find(x => x.id === id);
+        if(game.money >= a.cost && !game.ownedAccessories.includes(id)) {
+            game.money -= a.cost;
+            game.ownedAccessories.push(id);
+        }
+    }
+    else if(type === 'skin') {
+        let s = SKINS.find(x => x.id === id);
+        let curr = s.currency === 'rc' ? game.rc : game.money;
+        if(curr >= s.cost && !game.ownedSkins.includes(id)) {
+            if(s.currency === 'rc') game.rc -= s.cost; else game.money -= s.cost;
+            game.ownedSkins.push(id);
+        }
+    }
+    else if(type === 'autoclicker') {
+        if(game.money >= 1000000 && !game.autoClicker) {
+            game.money -= 1000000;
+            game.autoClicker = true;
+            startAutoClicker();
+        }
+    }
+    renderAll(); updateUI(); saveGame();
+}
+
+function equip(type, id) {
+    if(type === 'skin') { game.equippedSkin = id; applyVisuals(); }
+    if(type === 'accessory') { game.equippedAccessory = id; applyVisuals(); }
+    renderAll(); saveGame();
+}
+
+function applyVisuals() {
+    const btn = document.getElementById('main-btn');
+    const wrap = document.getElementById('btn-wrapper');
+    
+    // Skin
+    let s = SKINS.find(x => x.id === game.equippedSkin);
+    btn.className = '';
+    if(s && id !== 'default') btn.classList.add(`skin-${s.id}`);
+    
+    // Accessory
+    wrap.className = 'btn-wrapper';
+    let a = ACCESSORIES.find(x => x.id === game.equippedAccessory);
+    if(a) wrap.classList.add(a.class);
+}
+
+// --- RENDEROWANIE SKLEPÓW ---
+function renderAll() {
+    // Upgrades
+    let html = '';
+    UPGRADES.forEach(u => {
+        let lvl = game.upgrades[u.id];
+        let cost = Math.floor(u.cost * Math.pow(u.costMult, lvl));
+        html += `<div class="item-card"><div class="item-info"><h3>${u.name} (Lvl ${lvl})</h3></div>
+        <button class="btn-buy ${game.money>=cost?'can-afford':''}" onclick="buyItem('upgrade','${u.id}')">$${format(cost)}</button></div>`;
+    });
+    document.getElementById('list-upgrades').innerHTML = html;
+
+    // Pets (Dzielone na zwykłe i eventowe w odpowiednich zakładkach)
+    let petHtml = '';
+    let eventHtml = '';
+    
+    // Auto Clicker w Event
+    eventHtml += `<div class="item-card"><div class="item-info"><h3>🤖 Auto-Clicker</h3><p>Klika co 1s</p></div>
+    <button class="btn-buy ${game.autoClicker?'purchased':(game.money>=1000000?'can-afford':'')}" onclick="buyItem('autoclicker')">${game.autoClicker?'POSIADASZ':'$1M'}</button></div>`;
+
+    PETS.forEach(p => {
+        let owned = game.pets[p.id] > 0;
+        let btn = owned ? `<button class="btn-buy purchased">KUPIONE</button>` : 
+            `<button class="btn-buy ${game.money>=p.cost?'can-afford':''}" onclick="buyItem('pet','${p.id}')">$${format(p.cost)}</button>`;
+        let item = `<div class="item-card"><div class="item-info"><h3>${p.name}</h3><p>MPS: ${format(p.mps)}</p></div>${btn}</div>`;
+        
+        if(p.event) eventHtml += item; else petHtml += item;
+    });
+    document.getElementById('list-pets').innerHTML = petHtml;
+    
+    // Event Skin
+    let ws = SKINS.find(x => x.id === 'winter');
+    let wsOwned = game.ownedSkins.includes('winter');
+    let wsBtn = wsOwned ? `<button class="btn-buy purchased">POSIADASZ</button>` : 
+        `<button class="btn-buy ${game.money>=ws.cost?'can-afford':''}" onclick="buyItem('skin','winter')">$${format(ws.cost)}</button>`;
+    eventHtml += `<div class="item-card" style="border-color:cyan"><div class="item-info"><h3>🎅 Winter Skin (+30%)</h3></div>${wsBtn}</div>`;
+    
+    document.getElementById('list-event').innerHTML = eventHtml;
+
+    // Accessories
+    let accHtml = '';
+    ACCESSORIES.forEach(a => {
+        let owned = game.ownedAccessories.includes(a.id);
+        let equipped = game.equippedAccessory === a.id;
+        let btn = '';
+        if(equipped) btn = `<button class="btn-buy purchased">ZAŁOŻONE</button>`;
+        else if(owned) btn = `<button class="btn-buy can-afford" onclick="equip('accessory','${a.id}')">UBIERZ</button>`;
+        else btn = `<button class="btn-buy ${game.money>=a.cost?'can-afford':''}" onclick="buyItem('accessory','${a.id}')">$${format(a.cost)}</button>`;
+        
+        accHtml += `<div class="item-card"><div class="item-info"><h3>${a.name}</h3><p>Bonus: ${a.mult*100}%</p></div>${btn}</div>`;
+    });
+    document.getElementById('list-accessories').innerHTML = accHtml;
+
+    // Skins (zwykłe)
+    let skinHtml = '';
+    SKINS.forEach(s => {
+        if(s.event) return; // Pomiń eventowe tutaj
+        let owned = game.ownedSkins.includes(s.id);
+        let equipped = game.equippedSkin === s.id;
+        let btn = '';
+        if(equipped) btn = `<button class="btn-buy purchased">ZAŁOŻONE</button>`;
+        else if(owned) btn = `<button class="btn-buy can-afford" onclick="equip('skin','${s.id}')">UBIERZ</button>`;
+        else {
+            let costTxt = s.currency === 'rc' ? s.cost + ' RC' : '$' + format(s.cost);
+            let can = s.currency === 'rc' ? game.rc >= s.cost : game.money >= s.cost;
+            btn = `<button class="btn-buy ${can?'can-afford':''}" onclick="buyItem('skin','${s.id}')">${costTxt}</button>`;
+        }
+        skinHtml += `<div class="item-card"><div class="item-info"><h3>${s.name}</h3><p>Bonus: ${s.mult*100}%</p></div>${btn}</div>`;
+    });
+    document.getElementById('list-skins').innerHTML = skinHtml;
+    
+    // Active Pets Icons
+    let ap = document.getElementById('active-pets');
+    ap.innerHTML = '';
+    if(game.pets['p_elf'] > 0) ap.innerHTML += '🧝';
+    if(game.pets['p_sleigh'] > 0) ap.innerHTML += '🛷';
+}
+
+// --- UI UPDATE ---
+function updateUI() {
+    document.getElementById('ui-money').innerText = format(game.money);
+    document.getElementById('ui-rc').innerText = game.rc;
+    document.getElementById('ui-rebirth-count').innerText = game.rebirthCount;
+    
+    let rawMps = calculateMPS();
+    let speedMult = 1 + (game.upgrades.mps * 0.1);
+    let totalMult = calculateTotalMultiplier();
+    document.getElementById('ui-mps').innerText = format(rawMps * speedMult * totalMult);
+    document.getElementById('ui-mps-boost').innerText = `(+${Math.round((speedMult-1)*100)}%)`;
+    document.getElementById('ui-total-mult').innerText = totalMult.toFixed(2);
+    document.getElementById('ui-click-power').innerText = format(calculateClick());
+
+    // Rebirth Buttons Costs
+    document.getElementById('cost-r-1').innerText = format(getMultiRebirthCost(1));
+    document.getElementById('cost-r-3').innerText = format(getMultiRebirthCost(3));
+    document.getElementById('cost-r-10').innerText = format(getMultiRebirthCost(10));
+}
+
+// --- UTILS ---
+function format(num) {
+    if(num >= 1e6) return (num/1e6).toFixed(2)+'M';
+    if(num >= 1e3) return (num/1e3).toFixed(1)+'k';
+    return Math.floor(num);
+}
+
+function spawnParticle(x, y, text, color) {
+    let p = document.createElement('div');
+    p.className = 'particle';
+    p.innerText = text;
+    p.style.left = x + 'px';
+    p.style.top = y + 'px';
+    p.style.color = color;
+    document.getElementById('particles-container').appendChild(p);
+    setTimeout(() => p.remove(), 800);
+}
+
+function updateTimer() {
+    let now = new Date();
+    let h = 47 - (now.getHours() % 48);
+    let m = 59 - now.getMinutes();
+    let s = 59 - now.getSeconds();
+    document.getElementById('event-timer').innerText = `${h}:${m}:${s}`;
+}
+
+function switchTab(id, btn) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.getElementById('tab-' + id).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+function saveGame() { localStorage.setItem('CashSim_FinalFix', JSON.stringify(game)); }
+function loadGame() {
+    let d = localStorage.getItem('CashSim_FinalFix');
+    if(d) {
+        let p = JSON.parse(d);
+        game = { ...game, ...p };
+        // Fix for arrays
+        if(!game.ownedAccessories) game.ownedAccessories = [];
+        if(!game.pets) game.pets = {};
+    }
+}
+
 init();
-
-
-
